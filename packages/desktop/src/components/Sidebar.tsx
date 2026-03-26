@@ -1,7 +1,7 @@
 import {
   Inbox, Send, FileText, Trash2, Archive, ShieldAlert, FolderOpen,
-  ChevronDown, ChevronRight, Mail, CalendarDays,
-  ListTodo, User, Shield, Filter, Settings, Search,
+  ChevronDown, ChevronRight, Mail,
+  Settings,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -104,39 +104,65 @@ function AccountSection({ accountId, accountName, accountEmail }: { accountId: s
 
 export function Sidebar() {
   const { t } = useTranslation();
-  const { accounts } = useEmailStore();
-  const { currentView, setView, openKeyManager, openSettings } = useAppStore();
+  const { accounts, sidebarCollapsed } = useEmailStore();
+  const { currentView, setView, openSettings } = useAppStore();
 
   const navItems: Array<{ view: AppView; icon: React.ElementType; label: string }> = [
     { view: 'mail', icon: Mail, label: t('nav.mail') },
-    // { view: 'calendar', icon: CalendarDays, label: t('nav.calendar') },
-    // { view: 'tasks', icon: ListTodo, label: t('nav.tasks') },
-    // { view: 'contacts', icon: User, label: t('nav.contacts') },
   ];
+
+  const btnCls = 'rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-navy-400 dark:hover:bg-navy-800 dark:hover:text-navy-200';
+
+  const selectedAccountId = useEmailStore((s) => s.selectedAccountId);
+  const allFolders = useEmailStore((s) => s.folders);
+  const { selectedFolderId, selectFolder } = useEmailStore();
+
+  const collapsedPrimaryFolders = useMemo(() => {
+    if (!selectedAccountId) return [];
+    return allFolders.filter((f) => f.accountId === selectedAccountId && PRIMARY_TYPES.has(f.type));
+  }, [allFolders, selectedAccountId]);
+
+  if (sidebarCollapsed) {
+    return (
+      <div className="flex h-full w-12 flex-col items-center bg-sidebar-bg border-r border-sidebar-border dark:bg-navy-900 dark:border-navy-700/50 py-2 gap-0.5">
+        {collapsedPrimaryFolders.map((f) => {
+          const Icon = FOLDER_ICONS[f.type] || FileText;
+          const isActive = selectedFolderId === f.id;
+          return (
+            <button key={f.id} onClick={() => selectFolder(f.id)} title={f.name}
+              className={cn(
+                'relative rounded p-1.5 transition-colors',
+                isActive
+                  ? 'text-primary-600 bg-primary-100 dark:text-primary-400 dark:bg-primary-900/30'
+                  : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-navy-400 dark:hover:bg-navy-800 dark:hover:text-navy-200',
+              )}>
+              <Icon size={17} strokeWidth={1.5} />
+              {f.unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 rounded-full bg-primary-500 text-white text-[8px] font-bold flex items-center justify-center px-0.5">
+                  {f.unreadCount > 99 ? '99+' : f.unreadCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
+        <div className="flex-1" />
+        <div className="flex flex-col items-center gap-0.5 border-t border-gray-200 dark:border-navy-700/50 pt-2">
+          {navItems.map(({ view, icon: Icon, label }) => (
+            <button key={view} onClick={() => setView(view)} title={label}
+              className={cn(btnCls, currentView === view && 'text-primary-500 dark:text-primary-400 bg-primary-50 dark:bg-navy-800')}>
+              <Icon size={18} />
+            </button>
+          ))}
+          <button onClick={openSettings} title={t('settings.title')} className={btnCls}>
+            <Settings size={18} />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col bg-sidebar-bg border-r border-sidebar-border dark:bg-navy-900 dark:border-navy-700/50">
-      <div className="px-3 pt-2 pb-1">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-navy-400">
-            {currentView === 'mail' ? t('sidebar.accounts', { count: accounts.length }) : ''}
-          </span>
-          <div className="flex items-center gap-0.5">
-            <button onClick={openKeyManager} title="PGP Keys"
-              className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-navy-400 dark:hover:bg-navy-800 dark:hover:text-navy-200">
-              <Shield size={13} />
-            </button>
-            <button title="Filters"
-              className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-navy-400 dark:hover:bg-navy-800 dark:hover:text-navy-200">
-              <Filter size={13} />
-            </button>
-            <button title="Search"
-              className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-navy-400 dark:hover:bg-navy-800 dark:hover:text-navy-200">
-              <Search size={13} />
-            </button>
-          </div>
-        </div>
-      </div>
 
       {currentView === 'mail' && (
         <div className="flex-1 overflow-y-auto scrollbar-thin px-2 pb-2">

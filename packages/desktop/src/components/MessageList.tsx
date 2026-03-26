@@ -1,6 +1,6 @@
 import { useRef, useState, useMemo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Star, Paperclip, Reply, ArrowUpDown, ArrowDown, ArrowUp } from 'lucide-react';
+import { Star, Paperclip, Reply, ArrowUpDown, ArrowDown, ArrowUp, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { cn, getInitials, getAvatarColor } from '@/lib/utils';
 import { useEmailStore } from '@/stores/email-store';
@@ -79,7 +79,7 @@ function MessageRow({ message }: { message: Message }) {
 
 export function MessageList() {
   const parentRef = useRef<HTMLDivElement>(null);
-  const { messages, selectedFolderId, searchQuery, folders } = useEmailStore();
+  const { messages, selectedFolderId, searchQuery, folders, sidebarCollapsed, toggleSidebar } = useEmailStore();
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
@@ -128,8 +128,14 @@ export function MessageList() {
 
   return (
     <div className="flex h-full flex-col border-r border-gray-200 dark:border-navy-700/50">
-      <div className="flex items-center justify-between border-b border-gray-200 dark:border-navy-700/50 px-4 py-2.5">
-        <h2 className="text-sm font-semibold text-gray-800 dark:text-navy-100">{folder?.name ?? 'Messages'}</h2>
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-navy-700/50 pl-2 pr-4 py-2.5">
+        <div className="flex items-center gap-1.5">
+          <button onClick={toggleSidebar} title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="rounded p-0.5 text-gray-300 hover:bg-gray-100 hover:text-gray-500 dark:text-navy-500 dark:hover:bg-navy-800 dark:hover:text-navy-300">
+            {sidebarCollapsed ? <PanelLeftOpen size={14} strokeWidth={1.2} /> : <PanelLeftClose size={14} strokeWidth={1.2} />}
+          </button>
+          <h2 className="text-sm font-semibold text-gray-800 dark:text-navy-100">{folder?.name ?? 'Messages'}</h2>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-400 dark:text-navy-500">{filtered.length} messages</span>
           <div className="relative">

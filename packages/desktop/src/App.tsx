@@ -36,7 +36,7 @@ function MailView() {
 }
 
 export function App() {
-  const { sidebarWidth, setSidebarWidth, loadAccounts } = useEmailStore();
+  const { sidebarWidth, setSidebarWidth, sidebarCollapsed, loadAccounts } = useEmailStore();
   const { currentView } = useAppStore();
 
   useEffect(() => { loadAccounts(); }, [loadAccounts]);
@@ -50,10 +50,10 @@ export function App() {
     <div className="flex h-screen w-screen overflow-hidden flex-col">
       <Toolbar />
       <div className="flex flex-1 min-h-0">
-        <div style={{ width: sidebarWidth }} className="shrink-0">
+        <div style={{ width: sidebarCollapsed ? 48 : sidebarWidth }} className="shrink-0 transition-[width] duration-200">
           <Sidebar />
         </div>
-        <ResizeHandle onResize={handleSidebarResize} />
+        {!sidebarCollapsed && <ResizeHandle onResize={handleSidebarResize} />}
 
         {currentView === 'mail' && <MailView />}
         {currentView === 'calendar' && (

@@ -47,7 +47,7 @@ export function ResizeHandle({ onResize, className }: ResizeHandleProps) {
     <div
       onMouseDown={handleMouseDown}
       className={cn(
-        'group relative z-10 w-1 cursor-col-resize transition-colors hover:bg-primary-400 dark:hover:bg-primary-500',
+        'group relative z-10 w-px cursor-col-resize transition-colors hover:bg-primary-400 dark:hover:bg-primary-500',
         className,
       )}
     >
