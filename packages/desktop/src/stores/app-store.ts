@@ -4,11 +4,25 @@ import {
   type CalendarEvent, type Task, type ContactEntry, type PgpKey, type FilterRule,
 } from '@/lib/mock-data-phase3';
 
-export type AppView = 'mail' | 'calendar' | 'tasks' | 'contacts';
+export type AppView = 'mail' | 'calendar' | 'tasks' | 'contacts' | 'settings';
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+function applyTheme(mode: ThemeMode) {
+  const root = document.documentElement;
+  if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+  localStorage.setItem('simple-email-theme', mode);
+}
 
 interface AppState {
   currentView: AppView;
   setView: (view: AppView) => void;
+
+  theme: ThemeMode;
+  setTheme: (mode: ThemeMode) => void;
 
   pgpKeys: PgpKey[];
   keyManagerOpen: boolean;
@@ -58,9 +72,22 @@ interface AppState {
   deleteFilter: (id: string) => void;
 }
 
+const savedTheme = (localStorage.getItem('simple-email-theme') as ThemeMode) || 'light';
+applyTheme(savedTheme);
+
+if (savedTheme === 'system') {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    const current = useAppStore.getState().theme;
+    if (current === 'system') applyTheme('system');
+  });
+}
+
 export const useAppStore = create<AppState>((set) => ({
   currentView: 'mail',
   setView: (view) => set({ currentView: view }),
+
+  theme: savedTheme,
+  setTheme: (mode) => { applyTheme(mode); set({ theme: mode }); },
 
   pgpKeys: PGP_KEYS,
   keyManagerOpen: false,

@@ -10,6 +10,7 @@ import { TaskList } from '@/components/TaskList';
 import { ContactList } from '@/components/ContactList';
 import { KeyManager } from '@/components/KeyManager';
 import { FilterManager } from '@/components/FilterManager';
+import { SettingsView } from '@/components/SettingsView';
 import { useEmailStore } from '@/stores/email-store';
 import { useAppStore } from '@/stores/app-store';
 
@@ -23,7 +24,7 @@ function MailView() {
 
   return (
     <div className="flex flex-1 flex-col min-w-0">
-      <div className="border-b border-gray-200 px-4 py-2">
+      <div className="border-b border-gray-200 dark:border-gray-800 px-4 py-2">
         <SearchBar />
       </div>
       <div className="flex flex-1 min-h-0">
@@ -64,6 +65,9 @@ export function App() {
       )}
       {currentView === 'contacts' && (
         <div className="flex-1 min-w-0"><ContactList /></div>
+      )}
+      {currentView === 'settings' && (
+        <div className="flex-1 min-w-0"><SettingsView /></div>
       )}
 
       <Composer />

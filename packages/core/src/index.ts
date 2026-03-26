@@ -13,3 +13,11 @@ export {
   ContactRepository,
 } from './storage/repository.js';
 export * from './types/index.js';
+export {
+  parsePrefsJs,
+  extractAccounts,
+  parseMbox,
+  scanProfile,
+  getDefaultProfilePaths,
+} from './migration/index.js';
+export type { ThunderbirdAccount, ThunderbirdProfile, MboxMessage } from './migration/index.js';

@@ -22,9 +22,9 @@ function MessageRow({ message }: { message: Message }) {
     <div
       onClick={() => selectMessage(message.id)}
       className={cn(
-        'group flex cursor-pointer gap-3 border-b border-gray-100 px-4 py-3 transition-colors',
-        isSelected ? 'bg-primary-50 border-l-2 border-l-primary-500' : 'hover:bg-gray-50',
-        !message.isRead && 'bg-blue-50/40',
+        'group flex cursor-pointer gap-3 border-b border-gray-100 dark:border-gray-800 px-4 py-3 transition-colors',
+        isSelected ? 'bg-primary-50 border-l-2 border-l-primary-500 dark:bg-primary-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50',
+        !message.isRead && 'bg-blue-50/40 dark:bg-blue-900/10',
       )}
     >
       <div className={cn(
@@ -36,7 +36,7 @@ function MessageRow({ message }: { message: Message }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className={cn('truncate text-sm', !message.isRead ? 'font-semibold text-gray-900' : 'text-gray-700')}>
+          <span className={cn('truncate text-sm', !message.isRead ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300')}>
             {senderName}
           </span>
           <div className="ml-auto flex shrink-0 items-center gap-1.5">
@@ -46,7 +46,7 @@ function MessageRow({ message }: { message: Message }) {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <p className={cn('truncate text-sm', !message.isRead ? 'font-medium text-gray-800' : 'text-gray-600')}>
+          <p className={cn('truncate text-sm', !message.isRead ? 'font-medium text-gray-800 dark:text-gray-200' : 'text-gray-600 dark:text-gray-400')}>
             {message.subject}
           </p>
         </div>
@@ -94,10 +94,10 @@ export function MessageList() {
   const folder = folders.find((f) => f.id === selectedFolderId);
 
   return (
-    <div className="flex h-full flex-col border-r border-gray-200">
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2.5">
+    <div className="flex h-full flex-col border-r border-gray-200 dark:border-gray-800">
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4 py-2.5">
         <div>
-          <h2 className="text-sm font-semibold text-gray-800">{folder?.name ?? 'Messages'}</h2>
+          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{folder?.name ?? 'Messages'}</h2>
           <p className="text-xs text-gray-400">{filtered.length} messages</p>
         </div>
       </div>
