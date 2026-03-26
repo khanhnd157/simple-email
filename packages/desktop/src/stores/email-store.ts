@@ -7,11 +7,13 @@ import {
   type Folder,
   type Message,
 } from '@/lib/mock-data';
+import { createAccount, getAllAccounts, deleteAccount as removeAccount, type CreateAccountInput, type AccountRecord } from '@/lib/account-service';
 
 interface EmailState {
   accounts: Account[];
   folders: Folder[];
   messages: Message[];
+  dbAccounts: AccountRecord[];
 
   selectedAccountId: string | null;
   selectedFolderId: string | null;
@@ -33,12 +35,16 @@ interface EmailState {
   setSearchQuery: (query: string) => void;
   setSidebarWidth: (width: number) => void;
   setListWidth: (width: number) => void;
+  addAccount: (input: CreateAccountInput) => Promise<AccountRecord>;
+  removeAccount: (id: string) => Promise<void>;
+  loadAccounts: () => Promise<void>;
 }
 
 export const useEmailStore = create<EmailState>((set, get) => ({
   accounts: ACCOUNTS,
   folders: FOLDERS,
   messages: MESSAGES,
+  dbAccounts: [],
 
   selectedAccountId: ACCOUNTS[0]?.id ?? null,
   selectedFolderId: FOLDERS[0]?.id ?? null,
@@ -100,4 +106,32 @@ export const useEmailStore = create<EmailState>((set, get) => ({
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSidebarWidth: (width) => set({ sidebarWidth: Math.max(180, Math.min(400, width)) }),
   setListWidth: (width) => set({ listWidth: Math.max(280, Math.min(600, width)) }),
+
+  addAccount: async (input) => {
+    const record = await createAccount(input);
+    const account: Account = { id: record.id, name: record.name, email: record.email };
+    set((s) => ({
+      dbAccounts: [...s.dbAccounts, record],
+      accounts: [...s.accounts, account],
+    }));
+    return record;
+  },
+
+  removeAccount: async (id) => {
+    await removeAccount(id);
+    set((s) => ({
+      dbAccounts: s.dbAccounts.filter((a) => a.id !== id),
+      accounts: s.accounts.filter((a) => a.id !== id),
+    }));
+  },
+
+  loadAccounts: async () => {
+    const records = await getAllAccounts();
+    const loaded: Account[] = records.map((r) => ({ id: r.id, name: r.name, email: r.email }));
+    set({
+      dbAccounts: records,
+      accounts: loaded,
+      selectedAccountId: loaded[0]?.id ?? null,
+    });
+  },
 }));

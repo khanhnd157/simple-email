@@ -1,36 +1,25 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronRight, Mail, Server, Plus, Trash2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ChevronDown, ChevronRight, Mail, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SettingGroup, SettingRow, Toggle, Select, NumberInput, TextInput, Button, Checkbox, RadioGroup } from './controls';
+import { SettingGroup, SettingRow, Select, NumberInput, TextInput } from './controls';
 import { AddAccountDialog } from './AddAccountDialog';
+import { useEmailStore } from '@/stores/email-store';
 
 interface AccountNode {
   id: string; label: string; email?: string;
   children?: Array<{ id: string; label: string }>;
 }
 
-const MOCK_ACCOUNTS: AccountNode[] = [
-  {
-    id: 'acc1', label: 'mazetech@zohomail.com', email: 'mazetech@zohomail.com',
-    children: [
-      { id: 'identity', label: 'Identity' },
-      { id: 'copies', label: 'Copies & Folders' },
-      { id: 'composition', label: 'Composition' },
-      { id: 'storage', label: 'Local Storage' },
-      { id: 'junk', label: 'Junk Settings' },
-      { id: 'receipts', label: 'Return Receipts' },
-      { id: 'security', label: 'Security' },
-    ],
-  },
-  {
-    id: 'local', label: 'Local Folders',
-    children: [
-      { id: 'local-storage', label: 'Local Storage' },
-      { id: 'local-junk', label: 'Junk Settings' },
-    ],
-  },
-  { id: 'outgoing', label: 'Outgoing Server' },
+const ACCOUNT_CHILDREN = [
+  { id: 'identity', label: 'Identity' },
+  { id: 'copies', label: 'Copies & Folders' },
+  { id: 'composition', label: 'Composition' },
+  { id: 'storage', label: 'Local Storage' },
+  { id: 'junk', label: 'Junk Settings' },
+  { id: 'receipts', label: 'Return Receipts' },
+  { id: 'security', label: 'Security' },
 ];
+
 
 function TreeItem({ node, selected, onSelect, depth = 0 }: {
   node: AccountNode; selected: string; onSelect: (id: string) => void; depth?: number;
@@ -56,44 +45,33 @@ function TreeItem({ node, selected, onSelect, depth = 0 }: {
   );
 }
 
-function AccountSettingsForm() {
-  const [accountName, setAccountName] = useState('mazetech@zohomail.com');
-  const [incomingServer, setIncomingServer] = useState('imap.zoho.com');
-  const [port, setPort] = useState(993);
-  const [userName, setUserName] = useState('mazetech@zohomail.com');
-  const [connSecurity, setConnSecurity] = useState('ssl');
-  const [auth, setAuth] = useState('password');
-  const [checkStartup, setCheckStartup] = useState(true);
-  const [checkInterval, setCheckInterval] = useState(true);
-  const [intervalMin, setIntervalMin] = useState(10);
-  const [cleanupInbox, setCleanupInbox] = useState(false);
-  const [emptyTrash, setEmptyTrash] = useState(false);
-  const [serverNotify, setServerNotify] = useState(true);
-  const [deleteAction, setDeleteAction] = useState('move');
-  const [trashFolder, setTrashFolder] = useState('trash');
+function AccountSettingsForm({ accountId }: { accountId: string }) {
+  const account = useEmailStore((s) => s.dbAccounts.find((a) => a.id === accountId));
+
+  if (!account) {
+    return (
+      <div className="flex items-center justify-center h-full text-sm text-gray-400 dark:text-navy-500">
+        Select an account to view settings
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-gray-800 dark:text-navy-100 mb-4">Account Settings</h3>
+      <h3 className="text-sm font-semibold text-gray-800 dark:text-navy-100 mb-4">{account.name}</h3>
 
-      <SettingGroup title="Server">
-        <SettingRow label="Account Name">
-          <TextInput value={accountName} onChange={setAccountName} className="w-56" />
+      <SettingGroup title="Incoming Server (IMAP)">
+        <SettingRow label="User Name">
+          <TextInput value={account.imapUsername} onChange={() => {}} className="w-56" />
         </SettingRow>
-        <SettingRow label="Account Type">
-          <span className="text-sm text-gray-500">IMAP Mail Server</span>
-        </SettingRow>
-        <SettingRow label="Incoming Server">
-          <TextInput value={incomingServer} onChange={setIncomingServer} className="w-56" />
+        <SettingRow label="Server">
+          <TextInput value={account.imapHost} onChange={() => {}} className="w-56" />
         </SettingRow>
         <SettingRow label="Port">
-          <NumberInput value={port} onChange={setPort} min={1} max={65535} />
+          <NumberInput value={account.imapPort} onChange={() => {}} min={1} max={65535} />
         </SettingRow>
-        <SettingRow label="User Name">
-          <TextInput value={userName} onChange={setUserName} className="w-56" />
-        </SettingRow>
-        <SettingRow label="Connection Security">
-          <Select value={connSecurity} onChange={setConnSecurity} className="w-40"
+        <SettingRow label="Security">
+          <Select value={account.imapSecurity} onChange={() => {}} className="w-40"
             options={[
               { value: 'none', label: 'None' },
               { value: 'starttls', label: 'STARTTLS' },
@@ -101,72 +79,104 @@ function AccountSettingsForm() {
             ]} />
         </SettingRow>
         <SettingRow label="Authentication">
-          <Select value={auth} onChange={setAuth} className="w-40"
+          <Select value={account.imapAuth} onChange={() => {}} className="w-40"
             options={[
               { value: 'password', label: 'Password' },
               { value: 'oauth2', label: 'OAuth2' },
+              { value: 'none', label: 'None' },
             ]} />
         </SettingRow>
       </SettingGroup>
 
-      <SettingGroup title="Sync">
-        <SettingRow label="Check for new messages at startup">
-          <Toggle checked={checkStartup} onChange={setCheckStartup} />
+      <SettingGroup title="Outgoing Server (SMTP)">
+        <SettingRow label="User Name">
+          <TextInput value={account.smtpUsername} onChange={() => {}} className="w-56" />
         </SettingRow>
-        <SettingRow label="Check for new messages every">
-          <div className="flex items-center gap-2">
-            <Toggle checked={checkInterval} onChange={setCheckInterval} />
-            {checkInterval && <NumberInput value={intervalMin} onChange={setIntervalMin} min={1} max={60} suffix="min" />}
-          </div>
+        <SettingRow label="Server">
+          <TextInput value={account.smtpHost} onChange={() => {}} className="w-56" />
         </SettingRow>
-        <SettingRow label="Allow immediate server notifications (IDLE)">
-          <Toggle checked={serverNotify} onChange={setServerNotify} />
+        <SettingRow label="Port">
+          <NumberInput value={account.smtpPort} onChange={() => {}} min={1} max={65535} />
         </SettingRow>
-      </SettingGroup>
-
-      <SettingGroup title="Cleanup">
-        <SettingRow label="Clean up (Expunge) Inbox on Exit">
-          <Toggle checked={cleanupInbox} onChange={setCleanupInbox} />
-        </SettingRow>
-        <SettingRow label="Empty Trash on Exit">
-          <Toggle checked={emptyTrash} onChange={setEmptyTrash} />
-        </SettingRow>
-      </SettingGroup>
-
-      <SettingGroup title="When I delete a message">
-        <div className="px-4 py-3">
-          <RadioGroup value={deleteAction} onChange={setDeleteAction}
+        <SettingRow label="Security">
+          <Select value={account.smtpSecurity} onChange={() => {}} className="w-40"
             options={[
-              { value: 'move', label: 'Move it to Trash folder' },
-              { value: 'mark', label: 'Just mark it as deleted' },
-              { value: 'remove', label: 'Remove it immediately' },
+              { value: 'none', label: 'None' },
+              { value: 'starttls', label: 'STARTTLS' },
+              { value: 'ssl', label: 'SSL/TLS' },
             ]} />
-        </div>
+        </SettingRow>
+        <SettingRow label="Authentication">
+          <Select value={account.smtpAuth} onChange={() => {}} className="w-40"
+            options={[
+              { value: 'password', label: 'Password' },
+              { value: 'oauth2', label: 'OAuth2' },
+              { value: 'none', label: 'None' },
+            ]} />
+        </SettingRow>
       </SettingGroup>
     </div>
   );
 }
 
 export function AccountsTab() {
-  const [selected, setSelected] = useState('acc1');
+  const accounts = useEmailStore((s) => s.accounts);
+  const [selected, setSelected] = useState(accounts[0]?.id ?? '');
   const [addOpen, setAddOpen] = useState(false);
+
+  const accountNodes: AccountNode[] = useMemo(() => {
+    const nodes: AccountNode[] = accounts.map((acc) => ({
+      id: acc.id,
+      label: acc.email || acc.name,
+      email: acc.email,
+      children: ACCOUNT_CHILDREN.map((c) => ({ id: `${acc.id}-${c.id}`, label: c.label })),
+    }));
+    return nodes;
+  }, [accounts]);
+
+  const hasSelection = accounts.some((a) => a.id === selected);
+
+  if (accounts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] h-full gap-3">
+        <Mail size={36} className="text-gray-300 dark:text-navy-600" />
+        <p className="text-sm text-gray-500 dark:text-navy-400">No accounts configured</p>
+        <p className="text-xs text-gray-400 dark:text-navy-500 max-w-[260px] text-center">
+          Add an email account to start sending and receiving messages.
+        </p>
+        <button
+          onClick={() => setAddOpen(true)}
+          className="mt-2 flex items-center gap-1.5 rounded-lg border border-primary-400 dark:border-primary-500 bg-primary-50 dark:bg-primary-900/20 px-4 py-2 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+        >
+          <Plus size={14} /> Add Account
+        </button>
+        <AddAccountDialog open={addOpen} onClose={() => setAddOpen(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-4 h-full">
-      <div className="w-48 shrink-0 border-r border-gray-200 dark:border-navy-700 pr-3">
-        <div className="space-y-0.5">
-          {MOCK_ACCOUNTS.map((acc) => (
+      <div className="w-48 shrink-0 border-r border-gray-200 dark:border-navy-700 pr-3 flex flex-col">
+        <div className="grid grid-cols-2 gap-1.5 mb-2 pb-2 border-b border-gray-200 dark:border-navy-700">
+          <button className="flex items-center justify-center gap-1 text-xs py-1 rounded border border-gray-200 dark:border-navy-700 text-gray-600 dark:text-navy-300 hover:bg-primary-50 hover:border-primary-400 hover:text-primary-600 dark:hover:bg-primary-900/20 dark:hover:border-primary-500 dark:hover:text-primary-400 transition-colors" onClick={() => setAddOpen(true)}><Plus size={12} /> Add</button>
+          <button className="flex items-center justify-center gap-1 text-xs py-1 rounded border border-gray-200 dark:border-navy-700 text-gray-600 dark:text-navy-300 hover:bg-primary-50 hover:border-primary-400 hover:text-primary-600 dark:hover:bg-primary-900/20 dark:hover:border-primary-500 dark:hover:text-primary-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-gray-200 disabled:hover:text-gray-600 dark:disabled:hover:bg-transparent dark:disabled:hover:border-navy-700 dark:disabled:hover:text-navy-300" disabled={!hasSelection}><Trash2 size={12} /> Remove</button>
+        </div>
+        <div className="space-y-0.5 flex-1 overflow-y-auto scrollbar-thin">
+          {accountNodes.map((acc) => (
             <TreeItem key={acc.id} node={acc} selected={selected} onSelect={setSelected} />
           ))}
-        </div>
-        <div className="flex gap-1.5 mt-4 pt-3 border-t border-gray-200 dark:border-navy-700">
-          <Button variant="primary" className="flex items-center gap-1 text-xs" onClick={() => setAddOpen(true)}><Plus size={12} /> Add</Button>
-          <Button variant="danger" className="flex items-center gap-1"><Trash2 size={12} /> Remove</Button>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin pr-2">
-        <AccountSettingsForm />
+        {hasSelection ? (
+          <AccountSettingsForm accountId={selected} />
+        ) : (
+          <div className="flex items-center justify-center h-full text-sm text-gray-400 dark:text-navy-500">
+            Select an account to view settings
+          </div>
+        )}
       </div>
 
       <AddAccountDialog open={addOpen} onClose={() => setAddOpen(false)} />

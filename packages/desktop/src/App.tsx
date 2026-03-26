@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Toolbar } from '@/components/Toolbar';
 import { MessageList } from '@/components/MessageList';
@@ -36,8 +36,10 @@ function MailView() {
 }
 
 export function App() {
-  const { sidebarWidth, setSidebarWidth } = useEmailStore();
+  const { sidebarWidth, setSidebarWidth, loadAccounts } = useEmailStore();
   const { currentView } = useAppStore();
+
+  useEffect(() => { loadAccounts(); }, [loadAccounts]);
 
   const handleSidebarResize = useCallback(
     (delta: number) => setSidebarWidth(sidebarWidth + delta),

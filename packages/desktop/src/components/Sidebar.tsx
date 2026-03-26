@@ -100,9 +100,19 @@ export function Sidebar() {
 
       {currentView === 'mail' && (
         <div className="flex-1 overflow-y-auto scrollbar-thin px-2 pb-2">
-          {accounts.map((acc) => (
-            <AccountSection key={acc.id} accountId={acc.id} accountName={acc.name} />
-          ))}
+          {accounts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center px-4">
+              <Mail size={28} className="text-gray-300 dark:text-navy-600 mb-2" />
+              <p className="text-xs text-gray-400 dark:text-navy-500">{t('sidebar.noAccounts', 'No accounts added')}</p>
+              <button onClick={openSettings} className="mt-2 text-xs text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                {t('sidebar.addAccount', 'Add account')}
+              </button>
+            </div>
+          ) : (
+            accounts.map((acc) => (
+              <AccountSection key={acc.id} accountId={acc.id} accountName={acc.name} />
+            ))
+          )}
         </div>
       )}
 

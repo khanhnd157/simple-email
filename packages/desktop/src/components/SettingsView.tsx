@@ -36,7 +36,7 @@ export function SettingsDialog() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={closeSettings}>
       <div
-        className="w-[820px] max-h-[85vh] rounded-xl bg-white dark:bg-navy-900 shadow-2xl flex flex-col border border-gray-200 dark:border-navy-700/50"
+        className="w-[820px] h-[90vh] max-h-[720px] rounded-xl bg-white dark:bg-navy-900 shadow-2xl flex flex-col border border-gray-200 dark:border-navy-700/50"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-navy-700/50">
@@ -61,17 +61,22 @@ export function SettingsDialog() {
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-thin px-6 py-5">
-          <div className="max-w-2xl">
-            {activeTab === 'general' && <GeneralTab />}
-            {activeTab === 'accounts' && <AccountsTab />}
-            {activeTab === 'display' && <DisplayTab />}
-            {activeTab === 'composition' && <CompositionTab />}
-            {activeTab === 'privacy' && <PrivacyTab />}
-            {activeTab === 'security' && <SecurityTab />}
-            {activeTab === 'attachments' && <AttachmentsTab />}
-            {activeTab === 'advanced' && <AdvancedTab />}
-          </div>
+        <div className="flex-1 overflow-y-auto scrollbar-thin px-6 py-5 min-h-0 h-full">
+          {activeTab === 'accounts' ? (
+            <div className="h-full">
+              <AccountsTab />
+            </div>
+          ) : (
+            <div className="max-w-2xl">
+              {activeTab === 'general' && <GeneralTab />}
+              {activeTab === 'display' && <DisplayTab />}
+              {activeTab === 'composition' && <CompositionTab />}
+              {activeTab === 'privacy' && <PrivacyTab />}
+              {activeTab === 'security' && <SecurityTab />}
+              {activeTab === 'attachments' && <AttachmentsTab />}
+              {activeTab === 'advanced' && <AdvancedTab />}
+            </div>
+          )}
         </div>
       </div>
     </div>
