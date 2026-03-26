@@ -1,10 +1,10 @@
 import {
-  Reply, ReplyAll, Forward, Trash2, Archive, Star,
-  Paperclip, Download, MoreHorizontal, Mail,
+  Paperclip, Download, Mail,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn, getInitials, getAvatarColor, formatFileSize } from '@/lib/utils';
 import { useEmailStore } from '@/stores/email-store';
+import { useTranslation } from 'react-i18next';
 import type { Attachment } from '@/lib/mock-data';
 
 function AttachmentChip({ attachment }: { attachment: Attachment }) {
@@ -21,42 +21,16 @@ function AttachmentChip({ attachment }: { attachment: Attachment }) {
   );
 }
 
-function ActionButton({
-  icon: Icon,
-  label,
-  onClick,
-  variant = 'default',
-}: {
-  icon: React.ElementType;
-  label: string;
-  onClick?: () => void;
-  variant?: 'default' | 'danger';
-}) {
-  return (
-    <button
-      onClick={onClick}
-      title={label}
-      className={cn(
-        'rounded-md p-2 transition-colors',
-        variant === 'danger'
-          ? 'text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20'
-          : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300',
-      )}
-    >
-      <Icon size={18} />
-    </button>
-  );
-}
-
 export function MessageViewer() {
-  const { messages, selectedMessageId, toggleStar, deleteMessage, openComposer } = useEmailStore();
+  const { t } = useTranslation();
+  const { messages, selectedMessageId } = useEmailStore();
   const message = messages.find((m) => m.id === selectedMessageId);
 
   if (!message) {
     return (
-      <div className="flex h-full flex-col items-center justify-center text-gray-300">
+      <div className="flex h-full flex-col items-center justify-center text-gray-300 dark:text-gray-600">
         <Mail size={48} strokeWidth={1} />
-        <p className="mt-3 text-sm text-gray-400">Select a message to read</p>
+        <p className="mt-3 text-sm text-gray-400">{t('mail.selectMessage')}</p>
       </div>
     );
   }
@@ -66,24 +40,8 @@ export function MessageViewer() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-1 border-b border-gray-200 dark:border-gray-800 px-4 py-2">
-        <ActionButton icon={Reply} label="Reply" onClick={() => openComposer(message)} />
-        <ActionButton icon={ReplyAll} label="Reply All" />
-        <ActionButton icon={Forward} label="Forward" />
-        <div className="mx-1 h-5 w-px bg-gray-200" />
-        <ActionButton icon={Archive} label="Archive" />
-        <ActionButton icon={Trash2} label="Delete" variant="danger" onClick={() => deleteMessage(message.id)} />
-        <div className="flex-1" />
-        <ActionButton
-          icon={Star}
-          label="Star"
-          onClick={() => toggleStar(message.id)}
-        />
-        <ActionButton icon={MoreHorizontal} label="More" />
-      </div>
-
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="px-6 pt-5 pb-4">
+        <div className="px-6 pt-5 pb-3">
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 leading-tight">{message.subject}</h1>
         </div>
 
@@ -123,6 +81,14 @@ export function MessageViewer() {
           <div
             className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 prose-a:text-primary-600"
             dangerouslySetInnerHTML={{ __html: message.bodyHtml || message.bodyText }}
+          />
+        </div>
+
+        <div className="border-t border-gray-100 dark:border-gray-800 px-6 py-3">
+          <input
+            type="text"
+            placeholder={t('nav.mail') === 'Thư' ? 'Trả lời nhanh...' : 'Quick reply...'}
+            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 outline-none placeholder:text-gray-400 focus:border-primary-300 focus:ring-1 focus:ring-primary-200 dark:focus:ring-primary-900/30"
           />
         </div>
       </div>
