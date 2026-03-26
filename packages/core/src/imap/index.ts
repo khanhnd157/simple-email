@@ -106,7 +106,10 @@ export class ImapClient extends EventEmitter {
 
   private flattenTree(node: TreeNode, result: Folder[], parentPath?: string): void {
     if (node.path) {
-      const flags = Array.from(node.flags || []);
+      const rawFlags = node.flags;
+      const flags: string[] = rawFlags instanceof Set || Array.isArray(rawFlags)
+        ? Array.from(rawFlags)
+        : [];
       if (node.specialUse) flags.push(node.specialUse);
       result.push({
         id: '',
@@ -122,7 +125,10 @@ export class ImapClient extends EventEmitter {
     }
 
     if (node.folders) {
-      for (const [, child] of node.folders) {
+      const entries = node.folders instanceof Map
+        ? node.folders.entries()
+        : Object.entries(node.folders);
+      for (const [, child] of entries) {
         this.flattenTree(child as TreeNode, result, node.path || undefined);
       }
     }

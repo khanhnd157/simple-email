@@ -100,6 +100,7 @@ export function AddAccountDialog({ open, onClose }: { open: boolean; onClose: ()
   const [smtpAuth, setSmtpAuth] = useState<AuthType>('password');
 
   const addAccount = useEmailStore((s) => s.addAccount);
+  const connectAndSync = useEmailStore((s) => s.connectAndSync);
   const [saving, setSaving] = useState(false);
 
   if (!open) return null;
@@ -149,8 +150,6 @@ export function AddAccountDialog({ open, onClose }: { open: boolean; onClose: ()
       setStep('result');
     }, 600);
   };
-
-  const connectAndSync = useEmailStore((s) => s.connectAndSync);
 
   const handleAdd = async () => {
     if (saving) return;
