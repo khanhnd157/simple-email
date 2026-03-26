@@ -43,13 +43,13 @@ function Separator() {
 
 export function Toolbar() {
   const { t } = useTranslation();
-  const { searchQuery, setSearchQuery, openComposer, selectedMessageId, messages, deleteMessage, toggleStar } = useEmailStore();
-  const { currentView, setView } = useAppStore();
+  const { searchQuery, setSearchQuery, openComposer, selectedMessageId, messages, deleteMessage, toggleStar, syncAll, syncing } = useEmailStore();
+  const { currentView, setView, openSettings } = useAppStore();
   const message = messages.find((m) => m.id === selectedMessageId);
 
   return (
     <div className="flex items-center gap-0.5 border-b border-gray-200 dark:border-navy-700/50 bg-gray-50/80 dark:bg-navy-900 px-2 py-1">
-      <ToolbarButton icon={RefreshCw} label={t('nav.mail') === 'Thư' ? 'Nhận thư' : 'Get Mail'} />
+      <ToolbarButton icon={RefreshCw} label={syncing ? '...' : (t('nav.mail') === 'Thư' ? 'Đồng bộ' : 'Sync All')} onClick={syncAll} />
       <ToolbarButton icon={Home} label={t('nav.mail') === 'Thư' ? 'Trang chủ' : 'Home'} onClick={() => setView('mail')} active={currentView === 'mail'} />
 
       <Separator />
@@ -79,7 +79,7 @@ export function Toolbar() {
       <Separator />
 
       <ToolbarButton icon={Palette} label={t('nav.mail') === 'Thư' ? 'Giao diện' : 'Theme'}
-        onClick={() => setView('settings')} />
+        onClick={openSettings} />
       <ToolbarButton icon={LayoutGrid} label={t('nav.mail') === 'Thư' ? 'Hiển thị' : 'View'} />
 
       <div className="flex-1" />

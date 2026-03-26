@@ -155,15 +155,20 @@ export class AccountManager extends EventEmitter {
     return result;
   }
 
-  async syncMessages(accountId: string, folderPath: string): Promise<SyncResult> {
+  async syncMessages(accountId: string, folderPath: string, options?: { since?: Date }): Promise<SyncResult> {
     const conn = this.getConnection(accountId);
     const folder = await this.folderRepo.findByPath(accountId, folderPath);
     if (!folder) throw new Error(`Folder not found: ${folderPath}`);
 
     const maxUid = await this.messageRepo.getMaxUid(folder.id);
-    const fetchedMessages = maxUid > 0
-      ? await conn.imap.fetchNewMessages(folderPath, maxUid)
-      : await conn.imap.fetchMessages(folderPath);
+    let fetchedMessages;
+    if (maxUid > 0) {
+      fetchedMessages = await conn.imap.fetchNewMessages(folderPath, maxUid);
+    } else if (options?.since) {
+      fetchedMessages = await conn.imap.fetchMessagesByDate(folderPath, options.since);
+    } else {
+      fetchedMessages = await conn.imap.fetchMessages(folderPath);
+    }
 
     let newMessages = 0;
 

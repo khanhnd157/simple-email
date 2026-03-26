@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ResizeHandleProps {
@@ -8,38 +8,46 @@ interface ResizeHandleProps {
 
 export function ResizeHandle({ onResize, className }: ResizeHandleProps) {
   const startX = useRef(0);
+  const onResizeRef = useRef(onResize);
+  const dragging = useRef(false);
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      startX.current = e.clientX;
+  useEffect(() => {
+    onResizeRef.current = onResize;
+  });
 
-      const handleMouseMove = (e: MouseEvent) => {
-        const delta = e.clientX - startX.current;
-        startX.current = e.clientX;
-        onResize(delta);
-      };
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    startX.current = e.clientX;
+    dragging.current = true;
 
-      const handleMouseUp = () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
-      };
+    const handleMouseMove = (ev: MouseEvent) => {
+      if (!dragging.current) return;
+      const delta = ev.clientX - startX.current;
+      if (delta !== 0) {
+        startX.current = ev.clientX;
+        onResizeRef.current(delta);
+      }
+    };
 
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    },
-    [onResize],
-  );
+    const handleMouseUp = () => {
+      dragging.current = false;
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
 
   return (
     <div
       onMouseDown={handleMouseDown}
       className={cn(
-        'group relative z-10 w-1 cursor-col-resize hover:bg-primary-300 transition-colors',
+        'group relative z-10 w-1 cursor-col-resize transition-colors hover:bg-primary-400 dark:hover:bg-primary-500',
         className,
       )}
     >

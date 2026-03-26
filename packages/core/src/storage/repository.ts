@@ -116,7 +116,7 @@ export class FolderRepository {
   constructor(private db: DB) {}
 
   async upsert(folder: Omit<Folder, 'id'> & { id?: string }): Promise<Folder> {
-    const id = folder.id ?? uuid();
+    const id = folder.id || uuid();
     const existing = await this.db
       .select()
       .from(schema.folders)

@@ -106,7 +106,10 @@ export class ImapClient extends EventEmitter {
 
   private flattenTree(node: TreeNode, result: Folder[], parentPath?: string): void {
     if (node.path) {
-      const flags = Array.from(node.flags || []);
+      const rawFlags = node.flags;
+      const flags: string[] = rawFlags instanceof Set || Array.isArray(rawFlags)
+        ? Array.from(rawFlags)
+        : [];
       if (node.specialUse) flags.push(node.specialUse);
       result.push({
         id: '',
@@ -122,7 +125,10 @@ export class ImapClient extends EventEmitter {
     }
 
     if (node.folders) {
-      for (const [, child] of node.folders) {
+      const entries = node.folders instanceof Map
+        ? node.folders.entries()
+        : Object.entries(node.folders);
+      for (const [, child] of entries) {
         this.flattenTree(child as TreeNode, result, node.path || undefined);
       }
     }
@@ -167,6 +173,31 @@ export class ImapClient extends EventEmitter {
 
   async fetchNewMessages(folder: string, sinceUid: number): Promise<FetchMessageObject[]> {
     return this.fetchMessages(folder, { since: sinceUid + 1 });
+  }
+
+  async fetchMessagesByDate(folder: string, since: Date): Promise<FetchMessageObject[]> {
+    this.ensureConnected();
+    const lock = await this.client!.getMailboxLock(folder);
+    try {
+      const uids = await this.client!.search({ since }, { uid: true }) as number[];
+      if (uids.length === 0) return [];
+
+      const messages: FetchMessageObject[] = [];
+      const uidRange = uids.join(',');
+      for await (const msg of this.client!.fetch(uidRange, {
+        uid: true,
+        flags: true,
+        envelope: true,
+        bodyStructure: true,
+        size: true,
+        source: true,
+      }, { uid: true })) {
+        messages.push(msg);
+      }
+      return messages;
+    } finally {
+      lock.release();
+    }
   }
 
   async fetchMessageSource(folder: string, uid: number): Promise<Buffer> {

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Toolbar } from '@/components/Toolbar';
 import { MessageList } from '@/components/MessageList';
@@ -10,7 +10,7 @@ import { TaskList } from '@/components/TaskList';
 import { ContactList } from '@/components/ContactList';
 import { KeyManager } from '@/components/KeyManager';
 import { FilterManager } from '@/components/FilterManager';
-import { SettingsView } from '@/components/SettingsView';
+import { SettingsDialog } from '@/components/SettingsView';
 import { useEmailStore } from '@/stores/email-store';
 import { useAppStore } from '@/stores/app-store';
 
@@ -18,8 +18,8 @@ function MailView() {
   const { listWidth, setListWidth } = useEmailStore();
 
   const handleListResize = useCallback(
-    (delta: number) => setListWidth(listWidth + delta),
-    [listWidth, setListWidth],
+    (delta: number) => setListWidth(useEmailStore.getState().listWidth + delta),
+    [setListWidth],
   );
 
   return (
@@ -36,12 +36,14 @@ function MailView() {
 }
 
 export function App() {
-  const { sidebarWidth, setSidebarWidth } = useEmailStore();
+  const { sidebarWidth, setSidebarWidth, loadAccounts } = useEmailStore();
   const { currentView } = useAppStore();
 
+  useEffect(() => { loadAccounts(); }, [loadAccounts]);
+
   const handleSidebarResize = useCallback(
-    (delta: number) => setSidebarWidth(sidebarWidth + delta),
-    [sidebarWidth, setSidebarWidth],
+    (delta: number) => setSidebarWidth(useEmailStore.getState().sidebarWidth + delta),
+    [setSidebarWidth],
   );
 
   return (
@@ -63,12 +65,10 @@ export function App() {
         {currentView === 'contacts' && (
           <div className="flex-1 min-w-0"><ContactList /></div>
         )}
-        {currentView === 'settings' && (
-          <div className="flex-1 min-w-0"><SettingsView /></div>
-        )}
       </div>
       <Composer />
       <KeyManager />
+      <SettingsDialog />
     </div>
   );
 }

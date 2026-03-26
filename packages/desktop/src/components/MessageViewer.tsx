@@ -5,7 +5,12 @@ import { format } from 'date-fns';
 import { cn, getInitials, getAvatarColor, formatFileSize } from '@/lib/utils';
 import { useEmailStore } from '@/stores/email-store';
 import { useTranslation } from 'react-i18next';
-import type { Attachment } from '@/lib/mock-data';
+interface Attachment {
+  id: string;
+  filename: string;
+  contentType: string;
+  size: number;
+}
 
 function AttachmentChip({ attachment }: { attachment: Attachment }) {
   const ext = attachment.filename.split('.').pop()?.toUpperCase() ?? '';
@@ -71,8 +76,8 @@ export function MessageViewer() {
 
         {message.attachments.length > 0 && (
           <div className="mx-6 mb-4 flex flex-wrap gap-2">
-            {message.attachments.map((att) => (
-              <AttachmentChip key={att.id} attachment={att} />
+            {message.attachments.map((att, idx) => (
+              <AttachmentChip key={(att as Attachment).id ?? idx} attachment={att as Attachment} />
             ))}
           </div>
         )}

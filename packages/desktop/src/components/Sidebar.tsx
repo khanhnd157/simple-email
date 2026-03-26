@@ -1,5 +1,5 @@
 import {
-  Inbox, Send, FileText, Trash2, Archive, ShieldAlert,
+  Inbox, Send, FileText, Trash2, Archive, ShieldAlert, FolderOpen,
   ChevronDown, ChevronRight, Mail, CalendarDays,
   ListTodo, User, Shield, Filter, Settings, Search,
 } from 'lucide-react';
@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useEmailStore } from '@/stores/email-store';
 import { useAppStore, type AppView } from '@/stores/app-store';
-import type { Folder } from '@/lib/mock-data';
+import type { Folder } from '@/stores/email-store';
 
 const FOLDER_ICONS: Record<string, React.ElementType> = {
   inbox: Inbox, sent: Send, drafts: FileText,
@@ -40,22 +40,62 @@ function FolderItem({ folder }: { folder: Folder }) {
   );
 }
 
-function AccountSection({ accountId, accountName }: { accountId: string; accountName: string }) {
+const PRIMARY_TYPES = new Set(['inbox', 'sent', 'drafts', 'trash', 'junk', 'archive']);
+
+function PrimaryAndCustomFolders({ folders }: { folders: Folder[] }) {
+  const [customExpanded, setCustomExpanded] = useState(false);
+  const primary = useMemo(() => folders.filter((f) => PRIMARY_TYPES.has(f.type)), [folders]);
+  const custom = useMemo(() => folders.filter((f) => !PRIMARY_TYPES.has(f.type)), [folders]);
+
+  return (
+    <>
+      {primary.map((f) => <FolderItem key={f.id} folder={f} />)}
+      {custom.length > 0 && (
+        <div>
+          <button onClick={() => setCustomExpanded(!customExpanded)}
+            className="flex w-full items-center gap-2 rounded px-2 py-[5px] text-[13px] text-gray-500 dark:text-navy-400 hover:bg-sidebar-hover dark:hover:bg-navy-800 transition-colors">
+            {customExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+            <FolderOpen size={15} className="text-gray-400 dark:text-navy-400" />
+            <span className="flex-1 text-left">Folders</span>
+            <span className="text-[10px] text-gray-400 dark:text-navy-500">{custom.length}</span>
+          </button>
+          {customExpanded && (
+            <div className="ml-2 pl-2 space-y-px border-l border-gray-200 dark:border-navy-700/50">
+              {custom.map((f) => <FolderItem key={f.id} folder={f} />)}
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+function AccountSection({ accountId, accountName, accountEmail }: { accountId: string; accountName: string; accountEmail: string }) {
   const [expanded, setExpanded] = useState(true);
+  const selectedAccountId = useEmailStore((s) => s.selectedAccountId);
+  const selectAccount = useEmailStore((s) => s.selectAccount);
   const allFolders = useEmailStore((s) => s.folders);
   const folders = useMemo(() => allFolders.filter((f) => f.accountId === accountId), [allFolders, accountId]);
+  const isSelected = selectedAccountId === accountId;
 
   return (
     <div className="mb-0.5">
-      <button onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-1 rounded px-1.5 py-1 text-xs font-semibold text-gray-500 dark:text-navy-300 hover:text-gray-700 dark:hover:text-navy-100">
+      <button onClick={() => { selectAccount(accountId); setExpanded(!expanded); }}
+        className={cn(
+          'flex w-full items-center gap-1 rounded px-1.5 py-1 text-xs font-semibold transition-colors border-l-2',
+          isSelected
+            ? 'border-l-primary-500 bg-primary-100 text-primary-700 dark:border-l-primary-400 dark:bg-primary-900/30 dark:text-primary-300'
+            : 'border-l-transparent text-gray-500 dark:text-navy-300 hover:text-gray-700 dark:hover:text-navy-100 hover:bg-gray-50 dark:hover:bg-navy-800',
+        )}>
         {expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-        <Mail size={13} className="text-gray-400 dark:text-navy-400" />
-        <span className="truncate">{accountName}</span>
+        <div className="truncate text-left">
+          <span className="block truncate text-[13px]">{accountName}</span>
+          <span className={cn('block truncate text-[10px] font-normal', isSelected ? 'text-primary-500/70 dark:text-primary-400/60' : 'text-gray-400 dark:text-navy-500')}>{accountEmail}</span>
+        </div>
       </button>
       {expanded && (
         <div className="ml-2 space-y-px pl-2 border-l border-gray-200 dark:border-navy-700">
-          {folders.map((f) => <FolderItem key={f.id} folder={f} />)}
+          <PrimaryAndCustomFolders folders={folders} />
         </div>
       )}
     </div>
@@ -65,7 +105,7 @@ function AccountSection({ accountId, accountName }: { accountId: string; account
 export function Sidebar() {
   const { t } = useTranslation();
   const { accounts } = useEmailStore();
-  const { currentView, setView, openKeyManager } = useAppStore();
+  const { currentView, setView, openKeyManager, openSettings } = useAppStore();
 
   const navItems: Array<{ view: AppView; icon: React.ElementType; label: string }> = [
     { view: 'mail', icon: Mail, label: t('nav.mail') },
@@ -100,9 +140,19 @@ export function Sidebar() {
 
       {currentView === 'mail' && (
         <div className="flex-1 overflow-y-auto scrollbar-thin px-2 pb-2">
-          {accounts.map((acc) => (
-            <AccountSection key={acc.id} accountId={acc.id} accountName={acc.name} />
-          ))}
+          {accounts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center px-4">
+              <Mail size={28} className="text-gray-300 dark:text-navy-600 mb-2" />
+              <p className="text-xs text-gray-400 dark:text-navy-500">{t('sidebar.noAccounts', 'No accounts added')}</p>
+              <button onClick={openSettings} className="mt-2 text-xs text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                {t('sidebar.addAccount', 'Add account')}
+              </button>
+            </div>
+          ) : (
+            accounts.map((acc) => (
+              <AccountSection key={acc.id} accountId={acc.id} accountName={acc.name} accountEmail={acc.email} />
+            ))
+          )}
         </div>
       )}
 
@@ -122,13 +172,8 @@ export function Sidebar() {
               <span className="leading-none">{label}</span>
             </button>
           ))}
-          <button onClick={() => setView('settings')} title={t('settings.title')}
-            className={cn(
-              'flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors',
-              currentView === 'settings'
-                ? 'text-primary-500 bg-primary-50/60 dark:text-primary-400 dark:bg-navy-800'
-                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:text-navy-400 dark:hover:text-navy-200 dark:hover:bg-navy-850',
-            )}>
+          <button onClick={openSettings} title={t('settings.title')}
+            className="flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:text-navy-400 dark:hover:text-navy-200 dark:hover:bg-navy-850">
             <Settings size={18} strokeWidth={1.5} />
             <span className="leading-none">{t('settings.title')}</span>
           </button>
