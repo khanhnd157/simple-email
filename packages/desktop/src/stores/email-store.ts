@@ -173,7 +173,13 @@ export const useEmailStore = create<EmailState>((set, get) => ({
   openComposer: (replyTo) => set({ composerOpen: true, replyTo: replyTo ?? null }),
   closeComposer: () => set({ composerOpen: false, replyTo: null }),
   setSearchQuery: (query) => set({ searchQuery: query }),
-  setSidebarWidth: (width) => set({ sidebarWidth: Math.max(180, Math.min(400, width)) }),
+  setSidebarWidth: (width) => {
+    if (width < 120) {
+      set({ sidebarCollapsed: true });
+    } else {
+      set({ sidebarWidth: Math.max(180, Math.min(400, width)), sidebarCollapsed: false });
+    }
+  },
   setListWidth: (width) => set({ listWidth: Math.max(280, Math.min(600, width)) }),
 
   loadAccounts: async () => {
