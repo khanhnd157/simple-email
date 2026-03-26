@@ -22,9 +22,9 @@ function MessageRow({ message }: { message: Message }) {
     <div
       onClick={() => selectMessage(message.id)}
       className={cn(
-        'group flex cursor-pointer gap-3 border-b border-gray-100 dark:border-gray-800 px-4 py-3 transition-colors',
-        isSelected ? 'bg-primary-50 border-l-2 border-l-primary-500 dark:bg-primary-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50',
-        !message.isRead && 'bg-blue-50/40 dark:bg-blue-900/10',
+        'group flex cursor-pointer gap-3 border-b border-gray-100 dark:border-navy-700/30 px-4 py-3 transition-colors',
+        isSelected ? 'bg-primary-50 border-l-2 border-l-primary-500 dark:bg-primary-900/25' : 'hover:bg-gray-50 dark:hover:bg-navy-850',
+        !message.isRead && 'bg-blue-50/40 dark:bg-blue-950/30',
       )}
     >
       <div className={cn(
@@ -36,21 +36,21 @@ function MessageRow({ message }: { message: Message }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className={cn('truncate text-sm', !message.isRead ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300')}>
+          <span className={cn('truncate text-sm', !message.isRead ? 'font-semibold text-gray-900 dark:text-navy-100' : 'text-gray-700 dark:text-navy-300')}>
             {senderName}
           </span>
           <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            {message.isAnswered && <Reply size={13} className="text-gray-400" />}
-            {message.hasAttachments && <Paperclip size={13} className="text-gray-400" />}
-            <span className="text-xs text-gray-400">{formatMessageDate(message.date)}</span>
+            {message.isAnswered && <Reply size={13} className="text-gray-400 dark:text-navy-400" />}
+            {message.hasAttachments && <Paperclip size={13} className="text-gray-400 dark:text-navy-400" />}
+            <span className="text-xs text-gray-400 dark:text-navy-400">{formatMessageDate(message.date)}</span>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <p className={cn('truncate text-sm', !message.isRead ? 'font-medium text-gray-800 dark:text-gray-200' : 'text-gray-600 dark:text-gray-400')}>
+          <p className={cn('truncate text-sm', !message.isRead ? 'font-medium text-gray-800 dark:text-navy-100' : 'text-gray-600 dark:text-navy-300')}>
             {message.subject}
           </p>
         </div>
-        <p className="truncate text-xs text-gray-400 mt-0.5">{message.snippet}</p>
+        <p className="truncate text-xs text-gray-400 dark:text-navy-400 mt-0.5">{message.snippet}</p>
       </div>
 
       <button
@@ -94,10 +94,10 @@ export function MessageList() {
   const folder = folders.find((f) => f.id === selectedFolderId);
 
   return (
-    <div className="flex h-full flex-col border-r border-gray-200 dark:border-gray-800">
-      <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4 py-2.5">
+    <div className="flex h-full flex-col border-r border-gray-200 dark:border-navy-700/50">
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-navy-700/50 px-4 py-2.5">
         <div>
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{folder?.name ?? 'Messages'}</h2>
+          <h2 className="text-sm font-semibold text-gray-800 dark:text-navy-100">{folder?.name ?? 'Messages'}</h2>
           <p className="text-xs text-gray-400">{filtered.length} messages</p>
         </div>
       </div>

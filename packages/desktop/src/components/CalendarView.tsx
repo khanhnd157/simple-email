@@ -49,10 +49,10 @@ function MonthView() {
   }, [calendarEvents]);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="grid grid-cols-7 border-b border-gray-200">
+    <div className="flex flex-col h-full dark:bg-navy-950">
+      <div className="grid grid-cols-7 border-b border-gray-200 dark:border-navy-800 dark:bg-navy-900">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
-          <div key={d} className="py-2 text-center text-xs font-medium text-gray-400">
+          <div key={d} className="py-2 text-center text-xs font-medium text-gray-400 dark:text-navy-400">
             {d}
           </div>
         ))}
@@ -67,13 +67,17 @@ function MonthView() {
               key={key}
               onClick={() => setSelectedDate(day)}
               className={cn(
-                'border-b border-r border-gray-100 p-1 cursor-pointer hover:bg-gray-50 min-h-0 overflow-hidden',
-                !inMonth && 'bg-gray-50/50',
+                'border-b border-r border-gray-100 dark:border-navy-800 p-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-navy-850 min-h-0 overflow-hidden',
+                !inMonth && 'bg-gray-50/50 dark:bg-navy-900/50',
               )}
             >
               <div className={cn(
                 'mb-0.5 text-xs font-medium',
-                isToday(day) ? 'flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-white' : inMonth ? 'text-gray-700' : 'text-gray-300',
+                isToday(day)
+                  ? 'flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-white'
+                  : inMonth
+                    ? 'text-gray-700 dark:text-navy-200'
+                    : 'text-gray-300 dark:text-navy-400',
               )}>
                 {format(day, 'd')}
               </div>
@@ -82,7 +86,7 @@ function MonthView() {
                   <EventChip key={ev.id} event={ev} compact />
                 ))}
                 {events.length > 3 && (
-                  <div className="text-[10px] text-gray-400 pl-1">+{events.length - 3} more</div>
+                  <div className="text-[10px] text-gray-400 dark:text-navy-400 pl-1">+{events.length - 3} more</div>
                 )}
               </div>
             </div>
@@ -112,28 +116,28 @@ function WeekView() {
   }, [calendarEvents]);
 
   return (
-    <div className="flex flex-col h-full overflow-auto scrollbar-thin">
-      <div className="grid grid-cols-[60px_repeat(7,1fr)] sticky top-0 bg-white border-b border-gray-200 z-10">
+    <div className="flex flex-col h-full overflow-auto scrollbar-thin dark:bg-navy-950">
+      <div className="grid grid-cols-[60px_repeat(7,1fr)] sticky top-0 bg-white dark:bg-navy-900 border-b border-gray-200 dark:border-navy-800 z-10">
         <div />
         {days.map((d) => (
           <div key={d.toISOString()} className={cn(
-            'py-2 text-center border-l border-gray-100',
-            isToday(d) && 'bg-primary-50',
+            'py-2 text-center border-l border-gray-100 dark:border-navy-800',
+            isToday(d) && 'bg-primary-50 dark:bg-navy-850',
           )}>
-            <div className="text-xs text-gray-400">{format(d, 'EEE')}</div>
+            <div className="text-xs text-gray-400 dark:text-navy-400">{format(d, 'EEE')}</div>
             <div className={cn(
               'text-sm font-semibold',
-              isToday(d) ? 'text-primary-600' : 'text-gray-700',
+              isToday(d) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-navy-100',
             )}>
               {format(d, 'd')}
             </div>
           </div>
         ))}
       </div>
-      <div className="flex-1">
+      <div className="flex-1 dark:bg-navy-950">
         {hours.map((hour) => (
-          <div key={hour} className="grid grid-cols-[60px_repeat(7,1fr)] h-14 border-b border-gray-50">
-            <div className="pr-2 text-right text-[10px] text-gray-300 -mt-1.5">
+          <div key={hour} className="grid grid-cols-[60px_repeat(7,1fr)] h-14 border-b border-gray-50 dark:border-navy-800">
+            <div className="pr-2 text-right text-[10px] text-gray-300 dark:text-navy-400 -mt-1.5">
               {hour.toString().padStart(2, '0')}:00
             </div>
             {days.map((d) => {
@@ -142,7 +146,7 @@ function WeekView() {
                 (ev) => !ev.allDay && ev.start.getHours() === hour,
               );
               return (
-                <div key={key + hour} className="border-l border-gray-100 relative px-0.5">
+                <div key={key + hour} className="border-l border-gray-100 dark:border-navy-800 relative px-0.5">
                   {events.map((ev) => (
                     <EventChip key={ev.id} event={ev} />
                   ))}
@@ -173,26 +177,28 @@ export function CalendarView() {
   };
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-2.5">
+    <div className="flex h-full flex-col dark:bg-navy-950">
+      <div className="flex items-center gap-3 border-b border-gray-200 dark:border-navy-800 dark:bg-navy-900 px-4 py-2.5">
         <button onClick={() => openEventDialog()}
           className="flex items-center gap-1.5 rounded-lg bg-primary-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-700">
           <Plus size={15} /> New Event
         </button>
         <div className="flex items-center gap-1">
-          <button onClick={navigateBack} className="rounded p-1 hover:bg-gray-100"><ChevronLeft size={18} /></button>
-          <button onClick={() => setSelectedDate(new Date())} className="rounded px-2 py-0.5 text-sm font-medium hover:bg-gray-100">Today</button>
-          <button onClick={navigateForward} className="rounded p-1 hover:bg-gray-100"><ChevronRight size={18} /></button>
+          <button onClick={navigateBack} className="rounded p-1 text-gray-700 dark:text-navy-200 hover:bg-gray-100 dark:hover:bg-navy-850"><ChevronLeft size={18} /></button>
+          <button onClick={() => setSelectedDate(new Date())} className="rounded px-2 py-0.5 text-sm font-medium text-gray-800 dark:text-navy-200 hover:bg-gray-100 dark:hover:bg-navy-850">Today</button>
+          <button onClick={navigateForward} className="rounded p-1 text-gray-700 dark:text-navy-200 hover:bg-gray-100 dark:hover:bg-navy-850"><ChevronRight size={18} /></button>
         </div>
-        <h2 className="text-sm font-semibold text-gray-800">
+        <h2 className="text-sm font-semibold text-gray-800 dark:text-navy-100">
           {format(selectedDate, calendarView === 'month' ? 'MMMM yyyy' : "'Week of' MMM d, yyyy")}
         </h2>
-        <div className="ml-auto flex rounded-lg border border-gray-200 overflow-hidden">
+        <div className="ml-auto flex rounded-lg border border-gray-200 dark:border-navy-800 overflow-hidden dark:bg-navy-850">
           {(['month', 'week'] as const).map((v) => (
             <button key={v} onClick={() => setCalendarView(v)}
               className={cn(
                 'px-3 py-1 text-xs font-medium capitalize',
-                calendarView === v ? 'bg-primary-50 text-primary-700' : 'text-gray-500 hover:bg-gray-50',
+                calendarView === v
+                  ? 'bg-primary-50 text-primary-700 dark:bg-navy-800 dark:text-primary-400'
+                  : 'text-gray-500 hover:bg-gray-50 dark:text-navy-400 dark:hover:bg-navy-850',
               )}>
               {v}
             </button>
