@@ -23,8 +23,10 @@ function MessageRow({ message }: { message: Message }) {
       onClick={() => selectMessage(message.id)}
       className={cn(
         'group flex cursor-pointer gap-3 border-b border-gray-100 dark:border-navy-700/30 px-4 py-3 transition-colors',
-        isSelected ? 'bg-primary-50 border-l-2 border-l-primary-500 dark:bg-primary-900/25' : 'hover:bg-gray-50 dark:hover:bg-navy-850',
-        !message.isRead && 'bg-blue-50/40 dark:bg-blue-950/30',
+        isSelected
+          ? 'bg-primary-100 border-l-2 border-l-primary-500 dark:bg-primary-900/40 dark:border-l-primary-400'
+          : 'hover:bg-gray-50 dark:hover:bg-navy-850',
+        !message.isRead && !isSelected && 'bg-blue-50/40 dark:bg-blue-950/30',
       )}
     >
       <div className={cn(
