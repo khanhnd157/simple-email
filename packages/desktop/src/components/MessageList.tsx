@@ -1,6 +1,7 @@
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Star, Paperclip, Reply, ArrowUpDown, ArrowDown, ArrowUp, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Star, Paperclip, Reply, ArrowUpDown, ArrowDown, ArrowUp, PanelLeftClose, PanelLeftOpen, MoreHorizontal, FolderInput, Copy, Tag, Flag, Archive, Trash2, Forward, Mail, Printer, Save, MessageSquare } from 'lucide-react';
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { cn, getInitials, getAvatarColor } from '@/lib/utils';
 import { useEmailStore } from '@/stores/email-store';
@@ -22,16 +23,84 @@ function formatMessageDate(date: Date): string {
   return format(date, 'MMM d');
 }
 
+const MSG_MENU_ITEMS = [
+  { key: 'open', icon: Mail, label: 'Open' },
+  { key: 'reply', icon: Reply, label: 'Reply' },
+  { key: 'forward', icon: Forward, label: 'Forward' },
+  { key: 'divider1' },
+  { key: 'moveTo', icon: FolderInput, label: 'Move To' },
+  { key: 'copyTo', icon: Copy, label: 'Copy To' },
+  { key: 'tag', icon: Tag, label: 'Tag' },
+  { key: 'mark', icon: Flag, label: 'Mark' },
+  { key: 'divider2' },
+  { key: 'archive', icon: Archive, label: 'Archive' },
+  { key: 'delete', icon: Trash2, label: 'Delete' },
+  { key: 'divider3' },
+  { key: 'saveAs', icon: Save, label: 'Save As...' },
+  { key: 'print', icon: Printer, label: 'Print...' },
+] as const;
+
+function MessageContextMenu({ position, onClose }: { position: { x: number; y: number }; onClose: () => void }) {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ top: position.y, left: position.x });
+
+  useEffect(() => {
+    const menuH = 340;
+    const top = position.y + menuH > window.innerHeight ? Math.max(4, position.y - menuH) : position.y;
+    const left = Math.min(position.x, window.innerWidth - 200);
+    setPos({ top, left });
+  }, [position]);
+
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener('mousedown', handleOutside, true);
+    return () => document.removeEventListener('mousedown', handleOutside, true);
+  }, [onClose]);
+
+  return createPortal(
+    <div ref={menuRef} className="fixed z-[101] w-48 rounded-lg border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-900 shadow-xl py-1" style={{ top: pos.top, left: pos.left }}>
+        {MSG_MENU_ITEMS.map((item) =>
+          item.key.startsWith('divider') ? (
+            <div key={item.key} className="my-1 border-t border-gray-100 dark:border-navy-700/50" />
+          ) : (
+            <button key={item.key}
+              onClick={(e) => { e.stopPropagation(); onClose(); }}
+              className="flex w-full items-center gap-2.5 px-3 py-1.5 text-xs text-gray-600 dark:text-navy-300 hover:bg-gray-50 dark:hover:bg-navy-800 transition-colors">
+              {'icon' in item && item.icon && <item.icon size={13} className="text-gray-400 dark:text-navy-400" />}
+              {'label' in item && <span>{item.label}</span>}
+            </button>
+          ),
+        )}
+      </div>,
+    document.body,
+  );
+}
+
 function MessageRow({ message }: { message: Message }) {
   const { selectedMessageId, selectMessage, toggleStar } = useEmailStore();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const isSelected = selectedMessageId === message.id;
   const senderName = message.from[0]?.name || message.from[0]?.address || 'Unknown';
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    selectMessage(message.id);
+    setMenuPos({ x: e.clientX, y: e.clientY });
+    setMenuOpen(true);
+  }, [message.id, selectMessage]);
 
   return (
     <div
       onClick={() => selectMessage(message.id)}
+      onContextMenu={handleContextMenu}
       className={cn(
-        'group flex cursor-pointer gap-3 mx-2 my-0.5 px-3 py-2.5 rounded-lg transition-colors',
+        'group flex cursor-pointer gap-3 mx-2 my-0.5 px-3 py-2.5 rounded-lg transition-colors relative',
         isSelected
           ? 'bg-primary-100 border border-primary-300 dark:bg-primary-900/40 dark:border-primary-700/60'
           : 'border border-transparent hover:bg-gray-50 dark:hover:bg-navy-850',
@@ -64,15 +133,31 @@ function MessageRow({ message }: { message: Message }) {
         <p className="truncate text-xs text-gray-400 dark:text-navy-400 mt-0.5">{message.snippet}</p>
       </div>
 
-      <button
-        onClick={(e) => { e.stopPropagation(); toggleStar(message.id); }}
-        className={cn(
-          'mt-0.5 shrink-0 p-0.5 transition-colors',
-          message.isStarred ? 'text-amber-400' : 'text-gray-300 opacity-0 group-hover:opacity-100',
-        )}
-      >
-        <Star size={14} fill={message.isStarred ? 'currentColor' : 'none'} />
-      </button>
+      <div className="flex shrink-0 flex-col items-center gap-1 mt-0.5">
+        <button
+          onClick={(e) => { e.stopPropagation(); toggleStar(message.id); }}
+          className={cn(
+            'p-0.5 transition-colors',
+            message.isStarred ? 'text-amber-400' : 'text-gray-300 opacity-0 group-hover:opacity-100',
+          )}
+        >
+          <Star size={14} fill={message.isStarred ? 'currentColor' : 'none'} />
+        </button>
+        <div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const rect = e.currentTarget.getBoundingClientRect();
+              setMenuPos({ x: rect.right, y: rect.bottom + 4 });
+              setMenuOpen(!menuOpen);
+            }}
+            className="rounded p-0.5 text-gray-300 opacity-0 group-hover:opacity-100 hover:text-gray-500 hover:bg-gray-100 dark:hover:text-navy-200 dark:hover:bg-navy-800 transition-all"
+          >
+            <MoreHorizontal size={14} />
+          </button>
+          {menuOpen && <MessageContextMenu position={menuPos} onClose={() => setMenuOpen(false)} />}
+        </div>
+      </div>
     </div>
   );
 }
