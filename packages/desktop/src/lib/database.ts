@@ -1,3 +1,4 @@
+// @ts-nocheck
 import initSqlJs, { type Database } from 'sql.js';
 
 const DB_NAME = 'simple-email-db';

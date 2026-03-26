@@ -4,7 +4,7 @@ import { Star, Paperclip, Reply } from 'lucide-react';
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { cn, getInitials, getAvatarColor } from '@/lib/utils';
 import { useEmailStore } from '@/stores/email-store';
-import type { Message } from '@/lib/mock-data';
+import type { Message } from '@/stores/email-store';
 
 function formatMessageDate(date: Date): string {
   if (isToday(date)) return format(date, 'HH:mm');

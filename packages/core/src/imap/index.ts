@@ -169,6 +169,31 @@ export class ImapClient extends EventEmitter {
     return this.fetchMessages(folder, { since: sinceUid + 1 });
   }
 
+  async fetchMessagesByDate(folder: string, since: Date): Promise<FetchMessageObject[]> {
+    this.ensureConnected();
+    const lock = await this.client!.getMailboxLock(folder);
+    try {
+      const uids = await this.client!.search({ since }, { uid: true }) as number[];
+      if (uids.length === 0) return [];
+
+      const messages: FetchMessageObject[] = [];
+      const uidRange = uids.join(',');
+      for await (const msg of this.client!.fetch(uidRange, {
+        uid: true,
+        flags: true,
+        envelope: true,
+        bodyStructure: true,
+        size: true,
+        source: true,
+      }, { uid: true })) {
+        messages.push(msg);
+      }
+      return messages;
+    } finally {
+      lock.release();
+    }
+  }
+
   async fetchMessageSource(folder: string, uid: number): Promise<Buffer> {
     this.ensureConnected();
     const lock = await this.client!.getMailboxLock(folder);

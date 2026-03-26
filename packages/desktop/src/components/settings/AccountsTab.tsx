@@ -46,7 +46,7 @@ function TreeItem({ node, selected, onSelect, depth = 0 }: {
 }
 
 function AccountSettingsForm({ accountId }: { accountId: string }) {
-  const account = useEmailStore((s) => s.dbAccounts.find((a) => a.id === accountId));
+  const account = useEmailStore((s) => s.accountDetails.find((a) => a.id === accountId));
 
   if (!account) {
     return (
@@ -62,7 +62,7 @@ function AccountSettingsForm({ accountId }: { accountId: string }) {
 
       <SettingGroup title="Incoming Server (IMAP)">
         <SettingRow label="User Name">
-          <TextInput value={account.imapUsername} onChange={() => {}} className="w-56" />
+          <TextInput value={account.username} onChange={() => {}} className="w-56" />
         </SettingRow>
         <SettingRow label="Server">
           <TextInput value={account.imapHost} onChange={() => {}} className="w-56" />
@@ -71,7 +71,7 @@ function AccountSettingsForm({ accountId }: { accountId: string }) {
           <NumberInput value={account.imapPort} onChange={() => {}} min={1} max={65535} />
         </SettingRow>
         <SettingRow label="Security">
-          <Select value={account.imapSecurity} onChange={() => {}} className="w-40"
+          <Select value={account.imapSecure ? 'ssl' : 'none'} onChange={() => {}} className="w-40"
             options={[
               { value: 'none', label: 'None' },
               { value: 'starttls', label: 'STARTTLS' },
@@ -79,18 +79,17 @@ function AccountSettingsForm({ accountId }: { accountId: string }) {
             ]} />
         </SettingRow>
         <SettingRow label="Authentication">
-          <Select value={account.imapAuth} onChange={() => {}} className="w-40"
+          <Select value={account.authType} onChange={() => {}} className="w-40"
             options={[
               { value: 'password', label: 'Password' },
               { value: 'oauth2', label: 'OAuth2' },
-              { value: 'none', label: 'None' },
             ]} />
         </SettingRow>
       </SettingGroup>
 
       <SettingGroup title="Outgoing Server (SMTP)">
         <SettingRow label="User Name">
-          <TextInput value={account.smtpUsername} onChange={() => {}} className="w-56" />
+          <TextInput value={account.username} onChange={() => {}} className="w-56" />
         </SettingRow>
         <SettingRow label="Server">
           <TextInput value={account.smtpHost} onChange={() => {}} className="w-56" />
@@ -99,7 +98,7 @@ function AccountSettingsForm({ accountId }: { accountId: string }) {
           <NumberInput value={account.smtpPort} onChange={() => {}} min={1} max={65535} />
         </SettingRow>
         <SettingRow label="Security">
-          <Select value={account.smtpSecurity} onChange={() => {}} className="w-40"
+          <Select value={account.smtpSecure ? 'ssl' : 'none'} onChange={() => {}} className="w-40"
             options={[
               { value: 'none', label: 'None' },
               { value: 'starttls', label: 'STARTTLS' },
@@ -107,11 +106,10 @@ function AccountSettingsForm({ accountId }: { accountId: string }) {
             ]} />
         </SettingRow>
         <SettingRow label="Authentication">
-          <Select value={account.smtpAuth} onChange={() => {}} className="w-40"
+          <Select value={account.authType} onChange={() => {}} className="w-40"
             options={[
               { value: 'password', label: 'Password' },
               { value: 'oauth2', label: 'OAuth2' },
-              { value: 'none', label: 'None' },
             ]} />
         </SettingRow>
       </SettingGroup>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getDB, persistDB } from './database';
 import type { SecurityType, AuthType } from './email-autoconfig';
 

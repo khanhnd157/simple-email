@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useEmailStore } from '@/stores/email-store';
 import { useAppStore, type AppView } from '@/stores/app-store';
-import type { Folder } from '@/lib/mock-data';
+import type { Folder } from '@/stores/email-store';
 
 const FOLDER_ICONS: Record<string, React.ElementType> = {
   inbox: Inbox, sent: Send, drafts: FileText,

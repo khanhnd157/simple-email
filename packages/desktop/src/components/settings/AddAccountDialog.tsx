@@ -150,19 +150,31 @@ export function AddAccountDialog({ open, onClose }: { open: boolean; onClose: ()
     }, 600);
   };
 
+  const connectAndSync = useEmailStore((s) => s.connectAndSync);
+
   const handleAdd = async () => {
     if (saving) return;
     setSaving(true);
+    setError('');
     try {
-      await addAccount({
+      const account = await addAccount({
         name: displayName || email.split('@')[0],
         email,
-        imapHost, imapPort, imapSecurity, imapAuth, imapUsername,
-        smtpHost, smtpPort, smtpSecurity, smtpAuth, smtpUsername,
+        imapHost,
+        imapPort,
+        imapSecure: imapSecurity === 'ssl',
+        smtpHost,
+        smtpPort,
+        smtpSecure: smtpSecurity === 'ssl',
+        authType: imapAuth === 'none' ? 'password' : imapAuth,
+        username: imapUsername,
         password: password || undefined,
       });
+      await connectAndSync(account.id);
       onClose();
       resetForm();
+    } catch (err) {
+      setError((err as Error).message || 'Failed to add account');
     } finally {
       setSaving(false);
     }
@@ -310,6 +322,10 @@ export function AddAccountDialog({ open, onClose }: { open: boolean; onClose: ()
               </div>
             </div>
 
+            {error && step === 'result' && (
+              <p className="mt-3 text-xs text-red-500 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">{error}</p>
+            )}
+
             <div className="flex items-center justify-end gap-2 mt-5 pt-4 border-t border-gray-200 dark:border-navy-700/50">
               <button onClick={handleRetest}
                 className="rounded-lg border border-gray-200 dark:border-navy-700 px-4 py-2 text-xs font-medium text-gray-600 dark:text-navy-300 hover:bg-gray-50 dark:hover:bg-navy-800 transition-colors">
@@ -321,7 +337,7 @@ export function AddAccountDialog({ open, onClose }: { open: boolean; onClose: ()
               </button>
               <button onClick={handleAdd} disabled={!password.trim() || saving}
                 className="rounded-lg bg-primary-600 px-5 py-2 text-xs font-medium text-white hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                {saving ? 'Saving...' : 'Done'}
+                {saving ? 'Connecting...' : 'Done'}
               </button>
               <button onClick={handleClose}
                 className="rounded-lg border border-gray-200 dark:border-navy-700 px-4 py-2 text-xs font-medium text-gray-600 dark:text-navy-300 hover:bg-gray-50 dark:hover:bg-navy-800 transition-colors">
