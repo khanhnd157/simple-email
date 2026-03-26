@@ -10,7 +10,7 @@ import { TaskList } from '@/components/TaskList';
 import { ContactList } from '@/components/ContactList';
 import { KeyManager } from '@/components/KeyManager';
 import { FilterManager } from '@/components/FilterManager';
-import { SettingsView } from '@/components/SettingsView';
+import { SettingsDialog } from '@/components/SettingsView';
 import { useEmailStore } from '@/stores/email-store';
 import { useAppStore } from '@/stores/app-store';
 
@@ -63,12 +63,10 @@ export function App() {
         {currentView === 'contacts' && (
           <div className="flex-1 min-w-0"><ContactList /></div>
         )}
-        {currentView === 'settings' && (
-          <div className="flex-1 min-w-0"><SettingsView /></div>
-        )}
       </div>
       <Composer />
       <KeyManager />
+      <SettingsDialog />
     </div>
   );
 }

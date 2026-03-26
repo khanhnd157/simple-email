@@ -4,7 +4,7 @@ import {
   type CalendarEvent, type Task, type ContactEntry, type PgpKey, type FilterRule,
 } from '@/lib/mock-data-phase3';
 
-export type AppView = 'mail' | 'calendar' | 'tasks' | 'contacts' | 'settings';
+export type AppView = 'mail' | 'calendar' | 'tasks' | 'contacts';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 function applyTheme(mode: ThemeMode) {
@@ -23,6 +23,10 @@ interface AppState {
 
   theme: ThemeMode;
   setTheme: (mode: ThemeMode) => void;
+
+  settingsOpen: boolean;
+  openSettings: () => void;
+  closeSettings: () => void;
 
   pgpKeys: PgpKey[];
   keyManagerOpen: boolean;
@@ -88,6 +92,10 @@ export const useAppStore = create<AppState>((set) => ({
 
   theme: savedTheme,
   setTheme: (mode) => { applyTheme(mode); set({ theme: mode }); },
+
+  settingsOpen: false,
+  openSettings: () => set({ settingsOpen: true }),
+  closeSettings: () => set({ settingsOpen: false }),
 
   pgpKeys: PGP_KEYS,
   keyManagerOpen: false,

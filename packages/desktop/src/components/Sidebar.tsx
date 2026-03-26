@@ -65,7 +65,7 @@ function AccountSection({ accountId, accountName }: { accountId: string; account
 export function Sidebar() {
   const { t } = useTranslation();
   const { accounts } = useEmailStore();
-  const { currentView, setView, openKeyManager } = useAppStore();
+  const { currentView, setView, openKeyManager, openSettings } = useAppStore();
 
   const navItems: Array<{ view: AppView; icon: React.ElementType; label: string }> = [
     { view: 'mail', icon: Mail, label: t('nav.mail') },
@@ -122,13 +122,8 @@ export function Sidebar() {
               <span className="leading-none">{label}</span>
             </button>
           ))}
-          <button onClick={() => setView('settings')} title={t('settings.title')}
-            className={cn(
-              'flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors',
-              currentView === 'settings'
-                ? 'text-primary-500 bg-primary-50/60 dark:text-primary-400 dark:bg-navy-800'
-                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:text-navy-400 dark:hover:text-navy-200 dark:hover:bg-navy-850',
-            )}>
+          <button onClick={openSettings} title={t('settings.title')}
+            className="flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:text-navy-400 dark:hover:text-navy-200 dark:hover:bg-navy-850">
             <Settings size={18} strokeWidth={1.5} />
             <span className="leading-none">{t('settings.title')}</span>
           </button>
