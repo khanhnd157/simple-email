@@ -18,8 +18,8 @@ function MailView() {
   const { listWidth, setListWidth } = useEmailStore();
 
   const handleListResize = useCallback(
-    (delta: number) => setListWidth(listWidth + delta),
-    [listWidth, setListWidth],
+    (delta: number) => setListWidth(useEmailStore.getState().listWidth + delta),
+    [setListWidth],
   );
 
   return (
@@ -42,8 +42,8 @@ export function App() {
   useEffect(() => { loadAccounts(); }, [loadAccounts]);
 
   const handleSidebarResize = useCallback(
-    (delta: number) => setSidebarWidth(sidebarWidth + delta),
-    [sidebarWidth, setSidebarWidth],
+    (delta: number) => setSidebarWidth(useEmailStore.getState().sidebarWidth + delta),
+    [setSidebarWidth],
   );
 
   return (
