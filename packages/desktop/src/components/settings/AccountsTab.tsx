@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronRight, Mail, Server, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SettingGroup, SettingRow, Toggle, Select, NumberInput, TextInput, Button, Checkbox, RadioGroup } from './controls';
+import { AddAccountDialog } from './AddAccountDialog';
 
 interface AccountNode {
   id: string; label: string; email?: string;
@@ -148,6 +149,7 @@ function AccountSettingsForm() {
 
 export function AccountsTab() {
   const [selected, setSelected] = useState('acc1');
+  const [addOpen, setAddOpen] = useState(false);
 
   return (
     <div className="flex gap-4 h-full">
@@ -158,7 +160,7 @@ export function AccountsTab() {
           ))}
         </div>
         <div className="flex gap-1.5 mt-4 pt-3 border-t border-gray-200 dark:border-navy-700">
-          <Button variant="primary" className="flex items-center gap-1 text-xs"><Plus size={12} /> Add</Button>
+          <Button variant="primary" className="flex items-center gap-1 text-xs" onClick={() => setAddOpen(true)}><Plus size={12} /> Add</Button>
           <Button variant="danger" className="flex items-center gap-1"><Trash2 size={12} /> Remove</Button>
         </div>
       </div>
@@ -166,6 +168,8 @@ export function AccountsTab() {
       <div className="flex-1 overflow-y-auto scrollbar-thin pr-2">
         <AccountSettingsForm />
       </div>
+
+      <AddAccountDialog open={addOpen} onClose={() => setAddOpen(false)} />
     </div>
   );
 }
