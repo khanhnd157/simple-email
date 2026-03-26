@@ -16,6 +16,25 @@ export function createMessageRoutes(manager: AccountManager): Router {
     }
   });
 
+  router.patch('/messages/:id/read', async (req: Request, res: Response) => {
+    try {
+      const msgId = req.params.id as string;
+      const msg = await manager.getMessage(msgId);
+      if (!msg) { res.status(404).json({ error: 'Not found' }); return; }
+      const folders = await manager.getFolders(msg.accountId);
+      const folder = folders.find((f) => f.id === msg.folderId);
+      if (!folder) { res.status(404).json({ error: 'Folder not found' }); return; }
+      try {
+        await manager.markAsRead(msg.accountId, msgId, folder.path, msg.uid);
+      } catch {
+        await (manager as any).messageRepo.updateFlags(msgId, { isRead: true });
+      }
+      res.json({ ok: true });
+    } catch (err) {
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
   router.get('/messages/:id', async (req: Request, res: Response) => {
     try {
       const msgId = req.params.id as string;
