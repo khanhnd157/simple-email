@@ -138,17 +138,18 @@ export const useEmailStore = create<EmailState>((set, get) => ({
 
   selectMessage: (id) => {
     if (id) {
+      const msg = get().messages.find((m) => m.id === id);
+      const wasUnread = msg && !msg.isRead;
       set((s) => ({
         selectedMessageId: id,
         messages: s.messages.map((m) => (m.id === id ? { ...m, isRead: true } : m)),
-        folders: s.folders.map((f) => {
-          const msg = s.messages.find((m) => m.id === id);
-          if (msg && f.id === msg.folderId && !msg.isRead) {
-            return { ...f, unreadCount: Math.max(0, f.unreadCount - 1) };
-          }
-          return f;
-        }),
+        folders: wasUnread
+          ? s.folders.map((f) => (f.id === msg.folderId ? { ...f, unreadCount: Math.max(0, f.unreadCount - 1) } : f))
+          : s.folders,
       }));
+      if (wasUnread) {
+        api.markRead(id).catch(() => {});
+      }
     } else {
       set({ selectedMessageId: null });
     }

@@ -119,5 +119,8 @@ export const api = {
   getMessage: (id: string) =>
     request<MessageDTO>(`/messages/${id}`),
 
+  markRead: (id: string) =>
+    request<{ ok: boolean }>(`/messages/${id}/read`, { method: 'PATCH' }),
+
   health: () => request<{ status: string }>('/health'),
 };
