@@ -42,7 +42,7 @@ function TreeItem({ node, selected, onSelect, depth = 0 }: {
     <div>
       <button onClick={() => { hasChildren ? setExpanded(!expanded) : null; onSelect(node.id); }}
         className={cn('flex w-full items-center gap-1.5 rounded px-2 py-1 text-xs transition-colors',
-          isSelected ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800')}
+          isSelected ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'text-gray-600 dark:text-navy-300 hover:bg-gray-100 dark:hover:bg-navy-800')}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}>
         {hasChildren ? (expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />) : <span className="w-3" />}
         {depth === 0 ? <Mail size={12} /> : null}
@@ -73,7 +73,7 @@ function AccountSettingsForm() {
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-4">Account Settings</h3>
+      <h3 className="text-sm font-semibold text-gray-800 dark:text-navy-100 mb-4">Account Settings</h3>
 
       <SettingGroup title="Server">
         <SettingRow label="Account Name">
@@ -151,17 +151,18 @@ export function AccountsTab() {
 
   return (
     <div className="flex gap-4 h-full">
-      <div className="w-48 shrink-0 border-r border-gray-200 dark:border-gray-700 pr-3">
+      <div className="w-48 shrink-0 border-r border-gray-200 dark:border-navy-700 pr-3">
         <div className="space-y-0.5">
           {MOCK_ACCOUNTS.map((acc) => (
             <TreeItem key={acc.id} node={acc} selected={selected} onSelect={setSelected} />
           ))}
         </div>
-        <div className="flex gap-1.5 mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-          <Button variant="primary" className="flex items-center gap-1"><Plus size={12} /> Add</Button>
+        <div className="flex gap-1.5 mt-4 pt-3 border-t border-gray-200 dark:border-navy-700">
+          <Button variant="primary" className="flex items-center gap-1 text-xs"><Plus size={12} /> Add</Button>
           <Button variant="danger" className="flex items-center gap-1"><Trash2 size={12} /> Remove</Button>
         </div>
       </div>
+
       <div className="flex-1 overflow-y-auto scrollbar-thin pr-2">
         <AccountSettingsForm />
       </div>

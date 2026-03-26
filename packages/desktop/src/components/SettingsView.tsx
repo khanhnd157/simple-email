@@ -31,14 +31,14 @@ export function SettingsView() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 px-1">
+      <div className="flex items-center border-b border-gray-200 dark:border-navy-800 bg-gray-50/50 dark:bg-navy-900/50 px-1">
         {TABS.map(({ id, icon: Icon, label }) => (
           <button key={id} onClick={() => setActiveTab(id)}
             className={cn(
               'flex flex-col items-center gap-0.5 px-3 py-2 text-[10px] font-medium transition-colors rounded-t-md min-w-[60px]',
               activeTab === id
-                ? 'text-primary-600 bg-white dark:bg-gray-800 dark:text-primary-400 border-b-2 border-primary-500 -mb-px'
-                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+                ? 'text-primary-600 bg-white dark:bg-navy-800 dark:text-primary-400 border-b-2 border-primary-500 -mb-px'
+                : 'text-gray-400 hover:text-gray-600 dark:text-navy-400 dark:hover:text-navy-200 hover:bg-gray-100 dark:hover:bg-navy-850',
             )}>
             <Icon size={18} strokeWidth={1.5} />
             {label}

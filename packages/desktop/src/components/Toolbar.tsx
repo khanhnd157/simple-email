@@ -25,11 +25,11 @@ function ToolbarButton({
     <button onClick={onClick} title={label}
       className={cn(
         'flex flex-col items-center gap-0.5 rounded-md px-2.5 py-1 text-[10px] transition-colors min-w-[52px]',
-        variant === 'primary' && 'text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20',
-        variant === 'danger' && 'text-gray-500 dark:text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20',
+        variant === 'primary' && 'text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-navy-800',
+        variant === 'danger' && 'text-gray-500 dark:text-navy-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20',
         variant === 'default' && (active
-          ? 'text-primary-600 bg-primary-50 dark:text-primary-400 dark:bg-primary-900/20'
-          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200'),
+          ? 'text-primary-600 bg-primary-50 dark:text-primary-400 dark:bg-navy-800'
+          : 'text-gray-500 dark:text-navy-300 hover:bg-gray-100 dark:hover:bg-navy-800 hover:text-gray-700 dark:hover:text-navy-200'),
       )}>
       <Icon size={18} strokeWidth={1.5} />
       <span className="leading-none">{label}</span>
@@ -38,7 +38,7 @@ function ToolbarButton({
 }
 
 function Separator() {
-  return <div className="mx-0.5 h-8 w-px bg-gray-200 dark:bg-gray-700 self-center" />;
+  return <div className="mx-0.5 h-8 w-px bg-gray-200 dark:bg-navy-700 self-center" />;
 }
 
 export function Toolbar() {
@@ -48,7 +48,7 @@ export function Toolbar() {
   const message = messages.find((m) => m.id === selectedMessageId);
 
   return (
-    <div className="flex items-center gap-0.5 border-b border-gray-200 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-900/80 px-2 py-1">
+    <div className="flex items-center gap-0.5 border-b border-gray-200 dark:border-navy-700/50 bg-gray-50/80 dark:bg-navy-900 px-2 py-1">
       <ToolbarButton icon={RefreshCw} label={t('nav.mail') === 'Thư' ? 'Nhận thư' : 'Get Mail'} />
       <ToolbarButton icon={Home} label={t('nav.mail') === 'Thư' ? 'Trang chủ' : 'Home'} onClick={() => setView('mail')} active={currentView === 'mail'} />
 
@@ -91,7 +91,7 @@ export function Toolbar() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={t('mail.search')}
-          className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-1 pl-8 pr-7 text-xs text-gray-900 dark:text-gray-100 outline-none focus:border-primary-300 focus:ring-1 focus:ring-primary-200 dark:focus:ring-primary-900/30"
+          className="w-full rounded-md border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 py-1 pl-8 pr-7 text-xs text-gray-900 dark:text-gray-100 outline-none focus:border-primary-300 focus:ring-1 focus:ring-primary-200 dark:focus:ring-primary-900/30"
         />
         {searchQuery && (
           <button onClick={() => setSearchQuery('')}

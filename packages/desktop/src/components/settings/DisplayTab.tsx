@@ -102,7 +102,7 @@ function FormattingSub() {
         </SettingRow>
         <SettingRow label="Text Color">
           <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)}
-            className="h-7 w-10 rounded border border-gray-200 dark:border-gray-700 cursor-pointer" />
+            className="h-7 w-10 rounded border border-gray-200 dark:border-navy-700 cursor-pointer" />
         </SettingRow>
       </SettingGroup>
       <SettingGroup title="Quoted Text">
@@ -137,14 +137,14 @@ function TopicsSub() {
         </SettingRow>
       </SettingGroup>
       <SettingGroup title="Topics">
-        <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
+          <div className="divide-y divide-gray-100 dark:divide-navy-700/50">
           <div className="flex items-center px-4 py-2 text-xs font-medium text-gray-400 uppercase">
             <span className="flex-1">Topic</span><span className="w-20 text-center">Favorite</span>
           </div>
           {topics.map((t) => (
             <div key={t.name} className="flex items-center px-4 py-2">
               <div className="h-3 w-3 rounded-full mr-2.5" style={{ backgroundColor: t.color }} />
-              <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{t.name}</span>
+              <span className="flex-1 text-sm text-gray-700 dark:text-navy-200">{t.name}</span>
               <div className="w-20 flex justify-center">
                 <Toggle checked={t.favorite} onChange={() => {}} />
               </div>
@@ -179,7 +179,7 @@ function ThemesSub() {
               className={cn('flex items-center gap-1.5 rounded-lg border px-4 py-2 text-xs font-medium transition-colors',
                 theme === id
                   ? 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400 dark:border-primary-600'
-                  : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800')}>
+                  : 'border-gray-200 dark:border-navy-700 text-gray-500 dark:text-navy-300 hover:bg-gray-50 dark:hover:bg-navy-800')}>
               <Icon size={14} /> {label}
             </button>
           ))}
@@ -192,12 +192,12 @@ function ThemesSub() {
               className={cn('w-full text-left px-4 py-2 text-sm transition-colors',
                 selectedTheme === t
                   ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800')}>
+                  : 'text-gray-700 dark:text-navy-200 hover:bg-gray-50 dark:hover:bg-navy-850')}>
               {t}
             </button>
           ))}
         </div>
-        <div className="flex gap-1.5 px-4 py-2.5 border-t border-gray-100 dark:border-gray-700/50">
+        <div className="flex gap-1.5 px-4 py-2.5 border-t border-gray-100 dark:border-navy-700/50">
           <Button>New</Button>
           <Button>Edit</Button>
           <Button variant="danger">Delete</Button>
@@ -225,7 +225,7 @@ function AdvancedDisplaySub() {
       <SettingGroup title="Reading">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-700 dark:text-gray-300">Automatically mark messages as read</span>
+            <span className="text-sm text-gray-700 dark:text-navy-200">Automatically mark messages as read</span>
             <Toggle checked={autoRead} onChange={setAutoRead} />
           </div>
           {autoRead && (
