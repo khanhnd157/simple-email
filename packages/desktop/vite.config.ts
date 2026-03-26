@@ -15,5 +15,15 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react/jsx-runtime'],
+          editor: ['@tiptap/react', '@tiptap/starter-kit', '@tiptap/extension-placeholder'],
+          i18n: ['i18next', 'react-i18next'],
+          ui: ['lucide-react', 'date-fns', 'zustand'],
+        },
+      },
+    },
   },
 });
