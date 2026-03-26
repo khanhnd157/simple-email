@@ -1,0 +1,131 @@
+import {
+  Reply, ReplyAll, Forward, Trash2, Archive, Star,
+  Paperclip, Download, MoreHorizontal, Mail,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { cn, getInitials, getAvatarColor, formatFileSize } from '@/lib/utils';
+import { useEmailStore } from '@/stores/email-store';
+import type { Attachment } from '@/lib/mock-data';
+
+function AttachmentChip({ attachment }: { attachment: Attachment }) {
+  const ext = attachment.filename.split('.').pop()?.toUpperCase() ?? '';
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:bg-gray-100 transition-colors cursor-pointer group">
+      <Paperclip size={14} className="text-gray-400" />
+      <div className="min-w-0">
+        <p className="truncate text-xs font-medium text-gray-700">{attachment.filename}</p>
+        <p className="text-[10px] text-gray-400">{ext} · {formatFileSize(attachment.size)}</p>
+      </div>
+      <Download size={14} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+    </div>
+  );
+}
+
+function ActionButton({
+  icon: Icon,
+  label,
+  onClick,
+  variant = 'default',
+}: {
+  icon: React.ElementType;
+  label: string;
+  onClick?: () => void;
+  variant?: 'default' | 'danger';
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={label}
+      className={cn(
+        'rounded-md p-2 transition-colors',
+        variant === 'danger'
+          ? 'text-gray-400 hover:bg-red-50 hover:text-red-500'
+          : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600',
+      )}
+    >
+      <Icon size={18} />
+    </button>
+  );
+}
+
+export function MessageViewer() {
+  const { messages, selectedMessageId, toggleStar, deleteMessage, openComposer } = useEmailStore();
+  const message = messages.find((m) => m.id === selectedMessageId);
+
+  if (!message) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center text-gray-300">
+        <Mail size={48} strokeWidth={1} />
+        <p className="mt-3 text-sm text-gray-400">Select a message to read</p>
+      </div>
+    );
+  }
+
+  const senderName = message.from[0]?.name || message.from[0]?.address || 'Unknown';
+  const senderAddr = message.from[0]?.address || '';
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center gap-1 border-b border-gray-200 px-4 py-2">
+        <ActionButton icon={Reply} label="Reply" onClick={() => openComposer(message)} />
+        <ActionButton icon={ReplyAll} label="Reply All" />
+        <ActionButton icon={Forward} label="Forward" />
+        <div className="mx-1 h-5 w-px bg-gray-200" />
+        <ActionButton icon={Archive} label="Archive" />
+        <ActionButton icon={Trash2} label="Delete" variant="danger" onClick={() => deleteMessage(message.id)} />
+        <div className="flex-1" />
+        <ActionButton
+          icon={Star}
+          label="Star"
+          onClick={() => toggleStar(message.id)}
+        />
+        <ActionButton icon={MoreHorizontal} label="More" />
+      </div>
+
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="px-6 pt-5 pb-4">
+          <h1 className="text-xl font-semibold text-gray-900 leading-tight">{message.subject}</h1>
+        </div>
+
+        <div className="flex items-start gap-3 px-6 pb-4">
+          <div className={cn(
+            'flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white',
+            getAvatarColor(senderName),
+          )}>
+            {getInitials(senderName)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-gray-900">{senderName}</span>
+              <span className="text-xs text-gray-400">&lt;{senderAddr}&gt;</span>
+              <span className="ml-auto text-xs text-gray-400">
+                {format(message.date, 'MMM d, yyyy \'at\' HH:mm')}
+              </span>
+            </div>
+            <div className="mt-0.5 text-xs text-gray-400">
+              <span>To: {message.to.map((a) => a.name || a.address).join(', ')}</span>
+              {message.cc.length > 0 && (
+                <span> · CC: {message.cc.map((a) => a.name || a.address).join(', ')}</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {message.attachments.length > 0 && (
+          <div className="mx-6 mb-4 flex flex-wrap gap-2">
+            {message.attachments.map((att) => (
+              <AttachmentChip key={att.id} attachment={att} />
+            ))}
+          </div>
+        )}
+
+        <div className="border-t border-gray-100 px-6 py-5">
+          <div
+            className="prose prose-sm max-w-none text-gray-700 prose-a:text-primary-600"
+            dangerouslySetInnerHTML={{ __html: message.bodyHtml || message.bodyText }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
