@@ -1,7 +1,7 @@
 import {
   RefreshCw, Home, Reply, ReplyAll, Forward,
   Tag, MessageSquare, Archive, Trash2, PenSquare,
-  Bell, Palette, LayoutGrid, Search, X,
+  Bell, Palette, LayoutGrid, Search, X, Shield,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -44,7 +44,7 @@ function Separator() {
 export function Toolbar() {
   const { t } = useTranslation();
   const { searchQuery, setSearchQuery, openComposer, selectedMessageId, messages, deleteMessage, toggleStar, syncAll, syncing } = useEmailStore();
-  const { currentView, setView, openSettings } = useAppStore();
+  const { currentView, setView, openSettings, openKeyManager } = useAppStore();
   const message = messages.find((m) => m.id === selectedMessageId);
 
   return (
@@ -81,6 +81,10 @@ export function Toolbar() {
       <ToolbarButton icon={Palette} label={t('nav.mail') === 'Thư' ? 'Giao diện' : 'Theme'}
         onClick={openSettings} />
       <ToolbarButton icon={LayoutGrid} label={t('nav.mail') === 'Thư' ? 'Hiển thị' : 'View'} />
+
+      <Separator />
+
+      <ToolbarButton icon={Shield} label="PGP Keys" onClick={openKeyManager} />
 
       <div className="flex-1" />
 

@@ -59,7 +59,9 @@ interface EmailState {
   listWidth: number;
   loading: boolean;
   syncing: boolean;
+  sidebarCollapsed: boolean;
 
+  toggleSidebar: () => void;
   selectAccount: (id: string) => void;
   selectFolder: (id: string) => void;
   selectMessage: (id: string | null) => void;
@@ -116,7 +118,9 @@ export const useEmailStore = create<EmailState>((set, get) => ({
   listWidth: 360,
   loading: false,
   syncing: false,
+  sidebarCollapsed: false,
 
+  toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
   selectAccount: (id) => {
     const folders = get().folders.filter((f) => f.accountId === id);
     const inbox = folders.find((f) => f.type === 'inbox');
